@@ -1,8 +1,167 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 import axios from 'axios';
 import './App.css';
 
 const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+
+// Nyelvi fordítások
+const translations = {
+  hu: {
+    // Fejléc
+    title: '🎲 Társasjáték Gyűjteményem',
+    addGame: 'Játék hozzáadása',
+    
+    // Szűrők
+    allGames: 'Összes játék',
+    available: 'Elérhető',
+    borrowed: 'Kölcsönadva',
+    searchCollection: 'Keresés a gyűjteményben...',
+    
+    // Üres állapot
+    noGamesYet: 'Még nincsenek játékok a gyűjteményben',
+    startByAdding: 'Kezdd el az első társasjáték hozzáadásával!',
+    addFirstGame: 'Első játék hozzáadása',
+    
+    // Játék kártya
+    players: 'Játékosok',
+    time: 'Idő',
+    complexity: 'Bonyolultság',
+    designer: 'Tervező',
+    borrowedBy: 'Kölcsönvevő',
+    returnDate: 'Visszahozás',
+    lendGame: 'Játék kölcsönadása',
+    markReturned: 'Visszahozva',
+    remove: 'Eltávolítás',
+    
+    // Játék hozzáadása modal
+    addNewGame: 'Új játék hozzáadása',
+    searchBGG: 'Keresés BoardGameGeek-en',
+    enterGameName: 'Játék neve...',
+    search: 'Keresés',
+    searching: 'Keresés...',
+    searchResults: 'Találatok:',
+    released: 'Kiadás',
+    
+    // Játék részletek
+    year: 'Év',
+    categories: 'Kategóriák',
+    description: 'Leírás',
+    backToSearch: 'Vissza a kereséshez',
+    addToCollection: 'Hozzáadás a gyűjteményhez',
+    loadingDetails: 'Játék részletek betöltése...',
+    
+    // Kölcsönzés modal
+    lendGameTitle: 'Játék kölcsönadása',
+    borrowerName: 'Kölcsönvevő neve',
+    expectedReturn: 'Várható visszahozás',
+    cancel: 'Mégse',
+    confirm: 'Megerősítés',
+    
+    // Üzenetek
+    gameAlreadyExists: 'Ez a játék már szerepel a gyűjteményben!',
+    failedToAdd: 'Nem sikerült hozzáadni a játékot',
+    failedToBorrow: 'Nem sikerült kölcsönadni a játékot',
+    failedToReturn: 'Nem sikerült visszahozni a játékot',
+    failedToDelete: 'Nem sikerült törölni a játékot',
+    confirmDelete: 'Biztosan el szeretnéd távolítani ezt a játékot a gyűjteményből?',
+    
+    // Állapotok
+    statusAvailable: 'Elérhető',
+    statusBorrowed: 'Kölcsönadva'
+  },
+  en: {
+    // Header
+    title: '🎲 My Board Game Collection',
+    addGame: 'Add Game',
+    
+    // Filters
+    allGames: 'All Games',
+    available: 'Available',
+    borrowed: 'Borrowed',
+    searchCollection: 'Search your collection...',
+    
+    // Empty state
+    noGamesYet: 'No games in your collection yet',
+    startByAdding: 'Start by adding your first board game!',
+    addFirstGame: 'Add Your First Game',
+    
+    // Game card
+    players: 'Players',
+    time: 'Time',
+    complexity: 'Complexity',
+    designer: 'Designer',
+    borrowedBy: 'Borrowed by',
+    returnDate: 'Return date',
+    lendGame: 'Lend Game',
+    markReturned: 'Mark Returned',
+    remove: 'Remove',
+    
+    // Add game modal
+    addNewGame: 'Add New Game',
+    searchBGG: 'Search BoardGameGeek',
+    enterGameName: 'Enter game name...',
+    search: 'Search',
+    searching: 'Searching...',
+    searchResults: 'Search Results:',
+    released: 'Released',
+    
+    // Game details
+    year: 'Year',
+    categories: 'Categories',
+    description: 'Description',
+    backToSearch: 'Back to Search',
+    addToCollection: 'Add to Collection',
+    loadingDetails: 'Loading game details...',
+    
+    // Borrow modal
+    lendGameTitle: 'Lend Game',
+    borrowerName: 'Borrower Name',
+    expectedReturn: 'Expected Return Date',
+    cancel: 'Cancel',
+    confirm: 'Confirm',
+    
+    // Messages
+    gameAlreadyExists: 'This game is already in your collection!',
+    failedToAdd: 'Failed to add game to collection',
+    failedToBorrow: 'Failed to mark game as borrowed',
+    failedToReturn: 'Failed to mark game as returned',
+    failedToDelete: 'Failed to delete game',
+    confirmDelete: 'Are you sure you want to remove this game from your collection?',
+    
+    // Status
+    statusAvailable: 'Available',
+    statusBorrowed: 'Borrowed'
+  }
+};
+
+// Language Context
+const LanguageContext = createContext();
+
+function LanguageProvider({ children }) {
+  const [language, setLanguage] = useState('hu');
+  
+  const t = (key) => {
+    return translations[language][key] || key;
+  };
+  
+  const toggleLanguage = () => {
+    setLanguage(prev => prev === 'hu' ? 'en' : 'hu');
+  };
+  
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, t, toggleLanguage }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+}
+
+function useTranslation() {
+  const context = useContext(LanguageContext);
+  if (!context) {
+    throw new Error('useTranslation must be used within LanguageProvider');
+  }
+  return context;
+}
 
 function App() {
   const [games, setGames] = useState([]);
