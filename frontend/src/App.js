@@ -163,7 +163,8 @@ function useTranslation() {
   return context;
 }
 
-function App() {
+function AppContent() {
+  const { t, language, toggleLanguage } = useTranslation();
   const [games, setGames] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
   const [query, setQuery] = useState('');
