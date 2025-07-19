@@ -418,6 +418,21 @@ function AppContent() {
     }
   };
 
+  const clearAdvancedFilters = () => {
+    setAdvancedFilters({
+      minPlayers: '',
+      maxPlayers: '',
+      minTime: '',
+      maxTime: '',
+      minComplexity: '',
+      maxComplexity: '',
+      minYear: '',
+      maxYear: '',
+      category: '',
+      designer: ''
+    });
+  };
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString(language === 'hu' ? 'hu-HU' : 'en-US');
   };
