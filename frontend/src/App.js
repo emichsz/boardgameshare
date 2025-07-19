@@ -241,10 +241,14 @@ function AppContent() {
       const response = await axios.get(`${API_BASE_URL}/api/games/details/${bggId}`);
       const gameData = response.data;
       
-      // Alapértelmezett nyelvi beállítások
+      // Alapértelmezett nyelvi beállítások a felhasználó nyelvének megfelelően
       if (!gameData.title_hu) gameData.title_hu = '';
       if (!gameData.description_hu) gameData.description_hu = '';
-      if (!gameData.language) gameData.language = 'en';
+      
+      // Ha magyar felületen keresünk, alapértelmezett nyelv legyen magyar
+      if (!gameData.language) {
+        gameData.language = language === 'hu' ? 'hu' : 'en';
+      }
       
       setSelectedGame(gameData);
     } catch (error) {
