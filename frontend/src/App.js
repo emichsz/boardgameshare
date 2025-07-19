@@ -272,7 +272,42 @@ function AppContent() {
       if (searchFilter) params.append('search', searchFilter);
       
       const response = await axios.get(`${API_BASE_URL}/api/games?${params.toString()}`);
-      setGames(response.data);
+      let filteredGames = response.data;
+      
+      // Kliens oldali fejlett szűrés
+      if (showAdvancedFilters) {
+        filteredGames = filteredGames.filter(game => {
+          // Játékosok száma szűrés
+          if (advancedFilters.minPlayers && game.max_players < parseInt(advancedFilters.minPlayers)) return false;
+          if (advancedFilters.maxPlayers && game.min_players > parseInt(advancedFilters.maxPlayers)) return false;
+          
+          // Játékidő szűrés
+          if (advancedFilters.minTime && game.play_time < parseInt(advancedFilters.minTime)) return false;
+          if (advancedFilters.maxTime && game.play_time > parseInt(advancedFilters.maxTime)) return false;
+          
+          // Bonyolultság szűrés
+          if (advancedFilters.minComplexity && game.complexity_rating < parseFloat(advancedFilters.minComplexity)) return false;
+          if (advancedFilters.maxComplexity && game.complexity_rating > parseFloat(advancedFilters.maxComplexity)) return false;
+          
+          // Kiadási év szűrés
+          if (advancedFilters.minYear && game.release_year < parseInt(advancedFilters.minYear)) return false;
+          if (advancedFilters.maxYear && game.release_year > parseInt(advancedFilters.maxYear)) return false;
+          
+          // Kategória szűrés
+          if (advancedFilters.category && !game.categories.some(cat => 
+            cat.toLowerCase().includes(advancedFilters.category.toLowerCase())
+          )) return false;
+          
+          // Tervező szűrés
+          if (advancedFilters.designer && !game.authors.some(author => 
+            author.toLowerCase().includes(advancedFilters.designer.toLowerCase())
+          )) return false;
+          
+          return true;
+        });
+      }
+      
+      setGames(filteredGames);
     } catch (error) {
       console.error('Error fetching games:', error);
     }
