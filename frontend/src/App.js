@@ -676,6 +676,46 @@ function AppContent() {
                       </div>
                     </div>
 
+                    {/* Magyar lokalizációs mezők */}
+                    <div className="space-y-4 bg-blue-50 p-4 rounded-lg">
+                      <h4 className="font-medium text-gray-900">{t('hungarianTitle')} {t('optional')}</h4>
+                      <input
+                        type="text"
+                        value={selectedGame.title_hu || ''}
+                        onChange={(e) => setSelectedGame({...selectedGame, title_hu: e.target.value})}
+                        placeholder={selectedGame.title}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {t('gameLanguage')}
+                        </label>
+                        <select
+                          value={selectedGame.language || 'en'}
+                          onChange={(e) => setSelectedGame({...selectedGame, language: e.target.value})}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                          <option value="hu">{t('hungarian')}</option>
+                          <option value="en">{t('english')}</option>
+                          <option value="multilang">{t('multilingual')}</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {t('hungarianDescription')} {t('optional')}
+                        </label>
+                        <textarea
+                          value={selectedGame.description_hu || ''}
+                          onChange={(e) => setSelectedGame({...selectedGame, description_hu: e.target.value})}
+                          placeholder={selectedGame.description.substring(0, 100) + '...'}
+                          rows={3}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                      </div>
+                    </div>
+
                     {selectedGame.categories.length > 0 && (
                       <div>
                         <span className="font-medium text-gray-700">{t('categories')}: </span>
