@@ -831,11 +831,21 @@ function AppContent() {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                deleteGame(game.id);
+                setEditModal({ show: true, game });
+              }}
+              className="border border-blue-300 text-blue-600 px-3 py-1 rounded text-sm font-medium hover:bg-blue-50 transition-colors"
+            >
+              📝
+            </button>
+
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteGame(game.id, displayTitle);
               }}
               className="border border-red-300 text-red-600 px-3 py-1 rounded text-sm font-medium hover:bg-red-50 transition-colors"
             >
-              {t('remove')}
+              🗑️
             </button>
           </div>
         </div>
