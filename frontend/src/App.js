@@ -158,6 +158,16 @@ const translations = {
     failedToDelete: 'Failed to delete game',
     confirmDelete: 'Are you sure you want to remove this game from your collection?',
     
+    // View toggle
+    gridView: 'Grid View',
+    listView: 'List View',
+    
+    // Game details modal
+    gameDetails: 'Game Details',
+    rulesLink: 'Rules',
+    website: 'Website',
+    close: 'Close',
+    
     // Status
     statusAvailable: 'Available',
     statusBorrowed: 'Borrowed'
