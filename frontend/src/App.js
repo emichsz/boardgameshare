@@ -437,6 +437,152 @@ function AppContent() {
     return new Date(dateString).toLocaleDateString(language === 'hu' ? 'hu-HU' : 'en-US');
   };
 
+  const AdvancedFilters = () => (
+    <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-medium text-gray-900">{t('advancedFilters')}</h3>
+        <button
+          onClick={clearAdvancedFilters}
+          className="text-sm text-blue-600 hover:text-blue-800"
+        >
+          {t('clearFilters')}
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {/* Játékosok száma */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">{t('minPlayers')}</label>
+          <input
+            type="number"
+            min="1"
+            value={advancedFilters.minPlayers}
+            onChange={(e) => setAdvancedFilters({...advancedFilters, minPlayers: e.target.value})}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="1"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">{t('maxPlayers')}</label>
+          <input
+            type="number"
+            min="1"
+            value={advancedFilters.maxPlayers}
+            onChange={(e) => setAdvancedFilters({...advancedFilters, maxPlayers: e.target.value})}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="8"
+          />
+        </div>
+
+        {/* Játékidő */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">{t('minTime')}</label>
+          <input
+            type="number"
+            min="1"
+            value={advancedFilters.minTime}
+            onChange={(e) => setAdvancedFilters({...advancedFilters, minTime: e.target.value})}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="15"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">{t('maxTime')}</label>
+          <input
+            type="number"
+            min="1"
+            value={advancedFilters.maxTime}
+            onChange={(e) => setAdvancedFilters({...advancedFilters, maxTime: e.target.value})}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="180"
+          />
+        </div>
+
+        {/* Bonyolultság */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">{t('minComplexity')}</label>
+          <input
+            type="number"
+            min="0"
+            max="5"
+            step="0.1"
+            value={advancedFilters.minComplexity}
+            onChange={(e) => setAdvancedFilters({...advancedFilters, minComplexity: e.target.value})}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="1.0"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">{t('maxComplexity')}</label>
+          <input
+            type="number"
+            min="0"
+            max="5"
+            step="0.1"
+            value={advancedFilters.maxComplexity}
+            onChange={(e) => setAdvancedFilters({...advancedFilters, maxComplexity: e.target.value})}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="4.0"
+          />
+        </div>
+
+        {/* Kiadási év */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">{t('minYear')}</label>
+          <input
+            type="number"
+            min="1900"
+            max="2025"
+            value={advancedFilters.minYear}
+            onChange={(e) => setAdvancedFilters({...advancedFilters, minYear: e.target.value})}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="1995"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">{t('maxYear')}</label>
+          <input
+            type="number"
+            min="1900"
+            max="2025"
+            value={advancedFilters.maxYear}
+            onChange={(e) => setAdvancedFilters({...advancedFilters, maxYear: e.target.value})}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="2023"
+          />
+        </div>
+
+        {/* Kategória */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">{t('categoryFilter')}</label>
+          <input
+            type="text"
+            value={advancedFilters.category}
+            onChange={(e) => setAdvancedFilters({...advancedFilters, category: e.target.value})}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Strategy"
+          />
+        </div>
+
+        {/* Tervező */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">{t('designerFilter')}</label>
+          <input
+            type="text"
+            value={advancedFilters.designer}
+            onChange={(e) => setAdvancedFilters({...advancedFilters, designer: e.target.value})}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Reiner Knizia"
+          />
+        </div>
+      </div>
+    </div>
+  );
+
   const GameCard = ({ game }) => {
     const getLanguageLabel = (lang) => {
       switch (lang) {
