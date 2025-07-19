@@ -1194,6 +1194,16 @@ function AppContent() {
                 >
                   {t('rulesLink')}
                 </a>
+
+                <button
+                  onClick={() => {
+                    setEditModal({ show: true, game });
+                    onClose();
+                  }}
+                  className="px-4 py-2 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors"
+                >
+                  {t('editGame')}
+                </button>
                 
                 {game.status === 'available' ? (
                   <button
