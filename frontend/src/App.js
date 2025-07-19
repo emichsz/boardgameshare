@@ -1560,6 +1560,14 @@ function AppContent() {
         </div>
       )}
 
+      {/* Edit Game Modal */}
+      <EditGameModal
+        show={editModal.show}
+        game={editModal.game}
+        onClose={() => setEditModal({ show: false, game: null })}
+        onSave={updateGame}
+      />
+
       {/* Game Details Modal */}
       <GameDetailsModal
         show={detailsModal.show}
