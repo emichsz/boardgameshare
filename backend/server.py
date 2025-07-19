@@ -354,6 +354,33 @@ async def return_game(game_id: str):
         logger.error(f"Error returning game: {e}")
         raise HTTPException(status_code=500, detail="Failed to update game status")
 
+@app.put("/api/games/{game_id}", response_model=GameDetails)
+async def update_game(game_id: str, game_data: GameDetails):
+    """Update a game in the collection"""
+    try:
+        # Update the game in the database
+        result = await db.games.update_one(
+            {"id": game_id},
+            {"$set": game_data.dict()}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Game not found")
+        
+        # Return updated game
+        updated_game = await db.games.find_one({"id": game_id})
+        if updated_game:
+            updated_game["id"] = str(updated_game.get("_id", updated_game.get("id", "")))
+            if "_id" in updated_game:
+                del updated_game["_id"]
+            return GameDetails(**updated_game)
+        
+        raise HTTPException(status_code=404, detail="Game not found")
+        
+    except Exception as e:
+        logger.error(f"Error updating game: {e}")
+        raise HTTPException(status_code=500, detail="Failed to update game")
+
 @app.delete("/api/games/{game_id}")
 async def delete_game(game_id: str):
     """Remove a game from the collection"""
