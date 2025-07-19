@@ -563,6 +563,8 @@ function AppContent() {
       </div>
     );
   };
+
+  const SearchResultCard = ({ game }) => (
     <div 
       className="flex items-center p-4 bg-white rounded-lg shadow hover:shadow-md cursor-pointer transition-shadow"
       onClick={() => getGameDetails(game.id)}
