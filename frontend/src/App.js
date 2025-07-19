@@ -215,6 +215,8 @@ function AppContent() {
   const [filter, setFilter] = useState('all');
   const [searchFilter, setSearchFilter] = useState('');
   const [borrowModal, setBorrowModal] = useState({ show: false, game: null });
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' vagy 'list'
+  const [detailsModal, setDetailsModal] = useState({ show: false, game: null });
 
   // Fetch user's game collection
   const fetchGames = async () => {
