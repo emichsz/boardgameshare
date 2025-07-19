@@ -358,10 +358,13 @@ async def return_game(game_id: str):
 async def update_game(game_id: str, game_data: GameDetails):
     """Update a game in the collection"""
     try:
+        # Exclude None values and prepare update data
+        update_data = {k: v for k, v in game_data.dict().items() if v is not None}
+        
         # Update the game in the database
         result = await db.games.update_one(
             {"id": game_id},
-            {"$set": game_data.dict()}
+            {"$set": update_data}
         )
         
         if result.matched_count == 0:
