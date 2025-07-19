@@ -372,9 +372,18 @@ async def update_game(game_id: str, update_data: dict):
         
         logger.info(f"Cleaned update data: {cleaned_data}")
         
-        # Update the game in the database - try both id fields
+        # Update the game in the database - try both id fields and ObjectId
+        query_conditions = [{"id": game_id}]
+        
+        # Try ObjectId if the game_id looks like one
+        try:
+            if len(game_id) == 24:  # ObjectId length check
+                query_conditions.append({"_id": ObjectId(game_id)})
+        except:
+            pass
+            
         result = await db.games.update_one(
-            {"$or": [{"id": game_id}, {"_id": game_id}]},
+            {"$or": query_conditions},
             {"$set": cleaned_data}
         )
         
