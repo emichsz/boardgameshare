@@ -371,9 +371,9 @@ async def update_game(game_id: str, update_data: dict):
         
         logger.info(f"Cleaned update data: {cleaned_data}")
         
-        # Update the game in the database
+        # Update the game in the database - try both id fields
         result = await db.games.update_one(
-            {"id": game_id},
+            {"$or": [{"id": game_id}, {"_id": game_id}]},
             {"$set": cleaned_data}
         )
         
