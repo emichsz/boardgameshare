@@ -448,7 +448,121 @@ function AppContent() {
     );
   };
 
-  const SearchResultCard = ({ game }) => (
+  const GameListItem = ({ game }) => {
+    const getLanguageLabel = (lang) => {
+      switch (lang) {
+        case 'hu': return t('hungarian');
+        case 'en': return t('english');
+        case 'multilang': return t('multilingual');
+        default: return t('english');
+      }
+    };
+
+    const getLanguageColor = (lang) => {
+      switch (lang) {
+        case 'hu': return 'bg-red-100 text-red-800';
+        case 'en': return 'bg-blue-100 text-blue-800';
+        case 'multilang': return 'bg-green-100 text-green-800';
+        default: return 'bg-gray-100 text-gray-800';
+      }
+    };
+
+    const displayTitle = language === 'hu' && game.title_hu ? game.title_hu : game.title;
+
+    return (
+      <div 
+        className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow cursor-pointer"
+        onClick={() => setDetailsModal({ show: true, game })}
+      >
+        <div className="flex items-center gap-4">
+          <img
+            src={game.cover_image || '/api/placeholder/100/140'}
+            alt={displayTitle}
+            className="w-16 h-20 object-cover rounded"
+            onError={(e) => {
+              e.target.src = '/api/placeholder/100/140';
+            }}
+          />
+          
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between">
+              <h3 className="font-bold text-lg text-gray-900 truncate">{displayTitle}</h3>
+              <div className="flex gap-2 ml-4">
+                <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  game.status === 'available' 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'bg-orange-100 text-orange-800'
+                }`}>
+                  {game.status === 'available' ? t('statusAvailable') : t('statusBorrowed')}
+                </div>
+                <div className={`px-2 py-1 rounded-full text-xs font-medium ${getLanguageColor(game.language)}`}>
+                  {getLanguageLabel(game.language)}
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
+              <div>
+                <span className="font-medium">{t('players')}:</span> {game.min_players}-{game.max_players}
+              </div>
+              <div>
+                <span className="font-medium">{t('time')}:</span> {game.play_time} {t('min')}
+              </div>
+              <div>
+                <span className="font-medium">{t('complexity')}:</span> {game.complexity_rating.toFixed(1)}/5
+              </div>
+              {game.authors.length > 0 && (
+                <div>
+                  <span className="font-medium">{t('designer')}:</span> {game.authors.join(', ')}
+                </div>
+              )}
+            </div>
+
+            {game.status === 'borrowed' && (
+              <div className="mt-3 bg-orange-50 p-2 rounded-lg text-sm">
+                <p><span className="font-medium">{t('borrowedBy')}:</span> {game.borrowed_by}</p>
+                <p><span className="font-medium">{t('returnDate')}:</span> {formatDate(game.return_date)}</p>
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            {game.status === 'available' ? (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setBorrowModal({ show: true, game });
+                }}
+                className="bg-blue-600 text-white px-3 py-1 rounded text-sm font-medium hover:bg-blue-700 transition-colors"
+              >
+                {t('lendGame')}
+              </button>
+            ) : (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  returnGame(game.id);
+                }}
+                className="bg-green-600 text-white px-3 py-1 rounded text-sm font-medium hover:bg-green-700 transition-colors"
+              >
+                {t('markReturned')}
+              </button>
+            )}
+            
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteGame(game.id);
+              }}
+              className="border border-red-300 text-red-600 px-3 py-1 rounded text-sm font-medium hover:bg-red-50 transition-colors"
+            >
+              {t('remove')}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
     <div 
       className="flex items-center p-4 bg-white rounded-lg shadow hover:shadow-md cursor-pointer transition-shadow"
       onClick={() => getGameDetails(game.id)}
