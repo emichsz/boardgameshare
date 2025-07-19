@@ -204,9 +204,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "BoardGameGeek API Integration"
-    - "Game Collection CRUD"
-    - "Game Lending System"
+    - "Game Search UI"
   stuck_tasks:
     - "Game Search UI"
   test_all: false
