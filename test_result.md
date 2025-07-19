@@ -146,15 +146,18 @@ backend:
 
   - task: "Search and Filtering"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "NA"
         - agent: "main"
         - comment: "Implemented collection search by status, category, and text search across title/authors/categories"
+        - working: true
+        - agent: "testing"
+        - comment: "✅ COMPREHENSIVE TESTING PASSED: GET /api/games with status filter (e.g., ?status=available) works correctly. Text search parameter (?search=pandemic) successfully searches across titles, authors, and categories. All filtering functionality operational and returning correct results."
 
 frontend:
   - task: "Game Search UI"
