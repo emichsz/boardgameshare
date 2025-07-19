@@ -234,9 +234,9 @@ function AppContent() {
     } catch (error) {
       console.error('Error adding game:', error);
       if (error.response?.status === 409) {
-        alert('This game is already in your collection!');
+        alert(t('gameAlreadyExists'));
       } else {
-        alert('Failed to add game to collection');
+        alert(t('failedToAdd'));
       }
     }
   };
