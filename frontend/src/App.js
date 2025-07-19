@@ -277,7 +277,7 @@ function AppContent() {
       // Kliens oldali fejlett szűrés
       if (showAdvancedFilters) {
         filteredGames = filteredGames.filter(game => {
-          // Játékosok száma szűrés
+          // Játékosok száma szűrés (ha a max players <= beállított értékre)
           if (advancedFilters.minPlayers && game.max_players < parseInt(advancedFilters.minPlayers)) return false;
           if (advancedFilters.maxPlayers && game.min_players > parseInt(advancedFilters.maxPlayers)) return false;
           
