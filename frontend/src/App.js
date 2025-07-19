@@ -201,6 +201,13 @@ const translations = {
     gridView: 'Grid View',
     listView: 'List View',
     
+    // Game edit
+    editGame: 'Edit Game',
+    saveChanges: 'Save Changes',
+    personalNotes: 'Personal Notes',
+    editTitle: 'Edit Title',
+    editDescription: 'Edit Description',
+    
     // Game details modal
     gameDetails: 'Game Details',
     rulesLink: 'Rules',
