@@ -416,14 +416,29 @@ function AppContent() {
     }
   };
 
-  // Delete game
-  const deleteGame = async (gameId) => {
+  // Delete game with proper confirmation
+  const deleteGame = async (gameId, gameTitle) => {
+    const confirmMessage = `${t('confirmDelete')} "${gameTitle}"?`;
+    if (window.confirm(confirmMessage)) {
+      try {
+        await axios.delete(`${API_BASE_URL}/api/games/${gameId}`);
+        await fetchGames();
+      } catch (error) {
+        console.error('Error deleting game:', error);
+        alert(t('failedToDelete'));
+      }
+    }
+  };
+
+  // Update game
+  const updateGame = async (gameData) => {
     try {
-      await axios.delete(`${API_BASE_URL}/api/games/${gameId}`);
+      await axios.put(`${API_BASE_URL}/api/games/${gameData.id}`, gameData);
       await fetchGames();
+      setEditModal({ show: false, game: null });
     } catch (error) {
-      console.error('Error deleting game:', error);
-      alert(t('failedToDelete'));
+      console.error('Error updating game:', error);
+      alert('Nem sikerült frissíteni a játékot');
     }
   };
 
