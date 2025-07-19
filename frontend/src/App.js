@@ -264,7 +264,7 @@ function AppContent() {
       await fetchGames();
     } catch (error) {
       console.error('Error returning game:', error);
-      alert('Failed to mark game as returned');
+      alert(t('failedToReturn'));
     }
   };
 
