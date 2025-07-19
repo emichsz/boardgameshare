@@ -54,6 +54,7 @@ class GameDetails(BaseModel):
     categories: List[str] = []
     description: str = ""
     description_hu: Optional[str] = None  # Magyar leírás
+    personal_notes: Optional[str] = None  # Saját megjegyzések
     language: str = "en"  # Játék nyelve: hu, en, multilang
     status: str = "available"  # available, borrowed
     borrowed_by: Optional[str] = None
