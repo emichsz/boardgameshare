@@ -419,27 +419,38 @@ function AppContent() {
 
   // Delete game with proper confirmation
   const deleteGame = async (gameId, gameTitle) => {
-    const confirmMessage = `${t('confirmDelete')} "${gameTitle}"?`;
-    if (window.confirm(confirmMessage)) {
+    console.log('Delete game called:', gameId, gameTitle);
+    const confirmMessage = `Biztosan el szeretnéd távolítani a "${gameTitle}" játékot a gyűjteményből?`;
+    if (confirm(confirmMessage)) {
+      console.log('User confirmed deletion');
       try {
-        await axios.delete(`${API_BASE_URL}/api/games/${gameId}`);
+        console.log('Making DELETE request to:', `${API_BASE_URL}/api/games/${gameId}`);
+        const response = await axios.delete(`${API_BASE_URL}/api/games/${gameId}`);
+        console.log('Delete response:', response.status);
         await fetchGames();
+        console.log('Games refetched after deletion');
       } catch (error) {
         console.error('Error deleting game:', error);
-        alert(t('failedToDelete'));
+        alert('Nem sikerült törölni a játékot: ' + (error.response?.data?.detail || error.message));
       }
+    } else {
+      console.log('User cancelled deletion');
     }
   };
 
   // Update game
   const updateGame = async (gameData) => {
+    console.log('Update game called with data:', gameData);
     try {
-      await axios.put(`${API_BASE_URL}/api/games/${gameData.id}`, gameData);
+      console.log('Making PUT request to:', `${API_BASE_URL}/api/games/${gameData.id}`);
+      const response = await axios.put(`${API_BASE_URL}/api/games/${gameData.id}`, gameData);
+      console.log('Update response:', response.status);
       await fetchGames();
       setEditModal({ show: false, game: null });
+      console.log('Game updated successfully');
     } catch (error) {
       console.error('Error updating game:', error);
-      alert('Nem sikerült frissíteni a játékot');
+      alert('Nem sikerült frissíteni a játékot: ' + (error.response?.data?.detail || error.message));
     }
   };
 
