@@ -40,12 +40,9 @@ function App() {
     if (query.trim().length < 2) return;
     
     setIsSearching(true);
-    console.log('Searching BGG for:', query);
     try {
       const response = await axios.get(`${API_BASE_URL}/api/games/search/${encodeURIComponent(query)}`);
-      console.log('BGG search response:', response.data);
       setSearchResults(response.data);
-      console.log('Search results set:', response.data.length, 'games');
     } catch (error) {
       console.error('Error searching games:', error);
       setSearchResults([]);
