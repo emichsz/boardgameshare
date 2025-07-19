@@ -77,7 +77,22 @@ const translations = {
     failedToDelete: 'Nem sikerült törölni a játékot',
     confirmDelete: 'Biztosan el szeretnéd távolítani ezt a játékot a gyűjteményből?',
     
-    // Nézet váltás
+    // Összetett szűrők
+    advancedFilters: 'Részletes szűrők',
+    showFilters: 'Szűrők megjelenítése',
+    hideFilters: 'Szűrők elrejtése',
+    minPlayers: 'Min. játékosok',
+    maxPlayers: 'Max. játékosok',
+    minTime: 'Min. játékidő (perc)',
+    maxTime: 'Max. játékidő (perc)',
+    minComplexity: 'Min. bonyolultság',
+    maxComplexity: 'Max. bonyolultság',
+    minYear: 'Legkorábbi év',
+    maxYear: 'Legkésőbbi év',
+    categoryFilter: 'Kategória',
+    designerFilter: 'Tervező',
+    clearFilters: 'Szűrők törlése',
+    applyFilters: 'Szűrés',
     gridView: 'Rács nézet',
     listView: 'Lista nézet',
     
