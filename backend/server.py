@@ -42,6 +42,7 @@ class GameDetails(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     bgg_id: str
     title: str
+    title_hu: Optional[str] = None  # Magyar cím
     authors: List[str] = []
     cover_image: Optional[str] = None
     min_players: int = 1
@@ -52,6 +53,8 @@ class GameDetails(BaseModel):
     release_year: int = 0
     categories: List[str] = []
     description: str = ""
+    description_hu: Optional[str] = None  # Magyar leírás
+    language: str = "en"  # Játék nyelve: hu, en, multilang
     status: str = "available"  # available, borrowed
     borrowed_by: Optional[str] = None
     borrowed_date: Optional[datetime] = None
