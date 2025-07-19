@@ -905,7 +905,7 @@ function AppContent() {
           </div>
         </div>
 
-        {/* Games Grid */}
+        {/* Games Display */}
         {games.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🎲</div>
@@ -918,10 +918,16 @@ function AppContent() {
               {t('addFirstGame')}
             </button>
           </div>
-        ) : (
+        ) : viewMode === 'grid' ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {games.map((game) => (
               <GameCard key={game.id} game={game} />
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {games.map((game) => (
+              <GameListItem key={game.id} game={game} />
             ))}
           </div>
         )}
