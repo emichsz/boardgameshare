@@ -253,7 +253,7 @@ function AppContent() {
       setBorrowModal({ show: false, game: null });
     } catch (error) {
       console.error('Error borrowing game:', error);
-      alert('Failed to mark game as borrowed');
+      alert(t('failedToBorrow'));
     }
   };
 
