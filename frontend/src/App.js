@@ -785,26 +785,37 @@ function AppContent() {
     };
 
     const displayTitle = language === 'hu' && game.title_hu ? game.title_hu : game.title;
+    const displayDescription = language === 'hu' && game.description_hu ? game.description_hu : game.description;
 
     return (
       <div 
         className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow cursor-pointer"
         onClick={() => setDetailsModal({ show: true, game })}
       >
-        <div className="flex items-center gap-4">
-          <img
-            src={game.cover_image || '/api/placeholder/100/140'}
-            alt={displayTitle}
-            className="w-16 h-20 object-cover rounded"
-            onError={(e) => {
-              e.target.src = '/api/placeholder/100/140';
-            }}
-          />
+        <div className="flex items-start gap-4">
+          {/* Négyzetes kép */}
+          <div className="w-20 h-20 relative flex-shrink-0">
+            <img
+              src={game.cover_image || '/api/placeholder/80/80'}
+              alt={displayTitle}
+              className="w-full h-full object-cover rounded-lg"
+              onError={(e) => {
+                e.target.src = '/api/placeholder/80/80';
+              }}
+            />
+            
+            {/* Overlay az értékeléssel */}
+            {game.complexity_rating > 0 && (
+              <div className="absolute top-1 left-1 bg-yellow-500 text-black px-1 py-0.5 rounded text-xs font-bold">
+                ⭐ {game.complexity_rating.toFixed(1)}
+              </div>
+            )}
+          </div>
           
           <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between">
-              <h3 className="font-bold text-lg text-gray-900 truncate">{displayTitle}</h3>
-              <div className="flex gap-2 ml-4">
+            <div className="flex items-start justify-between mb-2">
+              <h3 className="font-bold text-lg text-gray-900 truncate pr-4">{displayTitle}</h3>
+              <div className="flex gap-2 flex-shrink-0">
                 <div className={`px-2 py-1 rounded-full text-xs font-medium ${
                   game.status === 'available' 
                     ? 'bg-green-100 text-green-800' 
@@ -818,31 +829,29 @@ function AppContent() {
               </div>
             </div>
             
-            <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
-              <div>
-                <span className="font-medium">{t('players')}:</span> {game.min_players}-{game.max_players}
-              </div>
-              <div>
-                <span className="font-medium">{t('time')}:</span> {game.play_time} {t('min')}
-              </div>
-              <div>
-                <span className="font-medium">{t('complexity')}:</span> {game.complexity_rating.toFixed(1)}/5
-              </div>
-              {game.authors.length > 0 && (
-                <div>
-                  <span className="font-medium">{t('designer')}:</span> {game.authors.join(', ')}
-                </div>
-              )}
+            {/* Alapvető játék információk */}
+            <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-2">
+              <div>👥 {game.min_players}-{game.max_players}</div>
+              <div>⏱️ {game.play_time} {t('min')}</div>
             </div>
 
+            {/* Leírás */}
+            {displayDescription && (
+              <p className="text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
+                {displayDescription.length > 100 ? displayDescription.substring(0, 100) + '...' : displayDescription}
+              </p>
+            )}
+
+            {/* Kölcsönzési információ */}
             {game.status === 'borrowed' && (
-              <div className="mt-3 bg-orange-50 p-2 rounded-lg text-sm">
+              <div className="bg-orange-50 p-2 rounded-lg mb-3 text-sm">
                 <p><span className="font-medium">{t('borrowedBy')}:</span> {game.borrowed_by}</p>
                 <p><span className="font-medium">{t('returnDate')}:</span> {formatDate(game.return_date)}</p>
               </div>
             )}
           </div>
 
+          {/* Akció gombok */}
           <div className="flex flex-col gap-2">
             {game.status === 'available' ? (
               <button
