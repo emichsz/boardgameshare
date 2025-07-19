@@ -420,7 +420,18 @@ async def delete_game(game_id: str):
     """Remove a game from the collection"""
     try:
         logger.info(f"Deleting game with ID: {game_id}")
-        result = await db.games.delete_one({"$or": [{"id": game_id}, {"_id": game_id}]})
+        
+        # Try both id fields and ObjectId
+        query_conditions = [{"id": game_id}]
+        
+        # Try ObjectId if the game_id looks like one
+        try:
+            if len(game_id) == 24:  # ObjectId length check
+                query_conditions.append({"_id": ObjectId(game_id)})
+        except:
+            pass
+            
+        result = await db.games.delete_one({"$or": query_conditions})
         logger.info(f"Delete result: deleted_count={result.deleted_count}")
         
         if result.deleted_count == 0:
