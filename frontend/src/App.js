@@ -10,6 +10,7 @@ const translations = {
     // Fejléc
     title: '🎲 Társasjáték Gyűjteményem',
     addGame: 'Játék hozzáadása',
+    language: 'Language',
     
     // Szűrők
     allGames: 'Összes játék',
@@ -25,6 +26,7 @@ const translations = {
     // Játék kártya
     players: 'Játékosok',
     time: 'Idő',
+    min: 'perc',
     complexity: 'Bonyolultság',
     designer: 'Tervező',
     borrowedBy: 'Kölcsönvevő',
@@ -73,6 +75,7 @@ const translations = {
     // Header
     title: '🎲 My Board Game Collection',
     addGame: 'Add Game',
+    language: 'Nyelv',
     
     // Filters
     allGames: 'All Games',
@@ -88,6 +91,7 @@ const translations = {
     // Game card
     players: 'Players',
     time: 'Time',
+    min: 'min',
     complexity: 'Complexity',
     designer: 'Designer',
     borrowedBy: 'Borrowed by',
@@ -282,7 +286,7 @@ function AppContent() {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString();
+    return new Date(dateString).toLocaleDateString(language === 'hu' ? 'hu-HU' : 'en-US');
   };
 
   const GameCard = ({ game }) => (
@@ -301,7 +305,7 @@ function AppContent() {
             ? 'bg-green-100 text-green-800' 
             : 'bg-orange-100 text-orange-800'
         }`}>
-          {game.status === 'available' ? 'Available' : 'Borrowed'}
+          {game.status === 'available' ? t('statusAvailable') : t('statusBorrowed')}
         </div>
       </div>
       
@@ -309,18 +313,18 @@ function AppContent() {
         <h3 className="font-bold text-lg text-gray-900 mb-2 line-clamp-2">{game.title}</h3>
         
         <div className="space-y-2 text-sm text-gray-600 mb-4">
-          <p><span className="font-medium">Players:</span> {game.min_players}-{game.max_players}</p>
-          <p><span className="font-medium">Time:</span> {game.play_time} min</p>
-          <p><span className="font-medium">Complexity:</span> {game.complexity_rating.toFixed(1)}/5</p>
+          <p><span className="font-medium">{t('players')}:</span> {game.min_players}-{game.max_players}</p>
+          <p><span className="font-medium">{t('time')}:</span> {game.play_time} {t('min')}</p>
+          <p><span className="font-medium">{t('complexity')}:</span> {game.complexity_rating.toFixed(1)}/5</p>
           {game.authors.length > 0 && (
-            <p><span className="font-medium">Designer:</span> {game.authors.join(', ')}</p>
+            <p><span className="font-medium">{t('designer')}:</span> {game.authors.join(', ')}</p>
           )}
         </div>
 
         {game.status === 'borrowed' && (
           <div className="bg-orange-50 p-2 rounded-lg mb-3 text-sm">
-            <p><span className="font-medium">Borrowed by:</span> {game.borrowed_by}</p>
-            <p><span className="font-medium">Return date:</span> {formatDate(game.return_date)}</p>
+            <p><span className="font-medium">{t('borrowedBy')}:</span> {game.borrowed_by}</p>
+            <p><span className="font-medium">{t('returnDate')}:</span> {formatDate(game.return_date)}</p>
           </div>
         )}
 
@@ -330,14 +334,14 @@ function AppContent() {
               onClick={() => setBorrowModal({ show: true, game })}
               className="flex-1 bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
             >
-              Lend Game
+              {t('lendGame')}
             </button>
           ) : (
             <button
               onClick={() => returnGame(game.id)}
               className="flex-1 bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
             >
-              Mark Returned
+              {t('markReturned')}
             </button>
           )}
           
@@ -345,7 +349,7 @@ function AppContent() {
             onClick={() => deleteGame(game.id)}
             className="px-3 py-2 border border-red-300 text-red-600 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors"
           >
-            Remove
+            {t('remove')}
           </button>
         </div>
       </div>
@@ -359,7 +363,7 @@ function AppContent() {
     >
       <div className="flex-1">
         <h3 className="font-semibold text-gray-900">{game.name}</h3>
-        {game.year && <p className="text-sm text-gray-500">Released: {game.year}</p>}
+        {game.year && <p className="text-sm text-gray-500">{t('released')}: {game.year}</p>}
       </div>
       <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -385,12 +389,12 @@ function AppContent() {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div className="bg-white rounded-xl p-6 max-w-md w-full">
-          <h2 className="text-xl font-bold mb-4">Lend Game: {game?.title}</h2>
+          <h2 className="text-xl font-bold mb-4">{t('lendGameTitle')}: {game?.title}</h2>
           
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Borrower Name
+                {t('borrowerName')}
               </label>
               <input
                 type="text"
@@ -403,7 +407,7 @@ function AppContent() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Expected Return Date
+                {t('expectedReturn')}
               </label>
               <input
                 type="date"
@@ -421,13 +425,13 @@ function AppContent() {
                 onClick={onClose}
                 className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
               >
-                Cancel
+                {t('cancel')}
               </button>
               <button
                 type="submit"
                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
-                Confirm
+                {t('confirm')}
               </button>
             </div>
           </form>
@@ -443,17 +447,25 @@ function AppContent() {
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold text-gray-900">
-              🎲 My Board Game Collection
+              {t('title')}
             </h1>
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              Add Game
-            </button>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={toggleLanguage}
+                className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                {language === 'hu' ? 'EN' : 'HU'}
+              </button>
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                {t('addGame')}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -471,7 +483,7 @@ function AppContent() {
                   : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
               }`}
             >
-              All Games ({games.length})
+              {t('allGames')} ({games.length})
             </button>
             <button
               onClick={() => setFilter('available')}
@@ -481,7 +493,7 @@ function AppContent() {
                   : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
               }`}
             >
-              Available
+              {t('available')}
             </button>
             <button
               onClick={() => setFilter('borrowed')}
@@ -491,14 +503,14 @@ function AppContent() {
                   : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
               }`}
             >
-              Borrowed
+              {t('borrowed')}
             </button>
           </div>
           
           <div className="flex-1">
             <input
               type="text"
-              placeholder="Search your collection..."
+              placeholder={t('searchCollection')}
               value={searchFilter}
               onChange={(e) => setSearchFilter(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -510,13 +522,13 @@ function AppContent() {
         {games.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🎲</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">No games in your collection yet</h2>
-            <p className="text-gray-600 mb-6">Start by adding your first board game!</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('noGamesYet')}</h2>
+            <p className="text-gray-600 mb-6">{t('startByAdding')}</p>
             <button
               onClick={() => setShowAddModal(true)}
               className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
             >
-              Add Your First Game
+              {t('addFirstGame')}
             </button>
           </div>
         ) : (
@@ -533,7 +545,7 @@ function AppContent() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Add New Game</h2>
+              <h2 className="text-2xl font-bold text-gray-900">{t('addNewGame')}</h2>
               <button
                 onClick={() => {
                   setShowAddModal(false);
@@ -554,7 +566,7 @@ function AppContent() {
                 {/* Search */}
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Search BoardGameGeek
+                    {t('searchBGG')}
                   </label>
                   <div className="flex gap-2">
                     <input
@@ -562,7 +574,7 @@ function AppContent() {
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && searchBGG()}
-                      placeholder="Enter game name..."
+                      placeholder={t('enterGameName')}
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                     <button
@@ -570,7 +582,7 @@ function AppContent() {
                       disabled={isSearching || query.trim().length < 2}
                       className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
-                      {isSearching ? 'Searching...' : 'Search'}
+                      {isSearching ? t('searching') : t('search')}
                     </button>
                   </div>
                 </div>
@@ -578,7 +590,7 @@ function AppContent() {
                 {/* Search Results */}
                 {searchResults.length > 0 && (
                   <div className="space-y-2">
-                    <h3 className="font-medium text-gray-900">Search Results:</h3>
+                    <h3 className="font-medium text-gray-900">{t('searchResults')}</h3>
                     {searchResults.map((game) => (
                       <SearchResultCard key={game.id} game={game} />
                     ))}
@@ -591,7 +603,7 @@ function AppContent() {
                 {isLoadingDetails ? (
                   <div className="text-center py-8">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading game details...</p>
+                    <p className="text-gray-600">{t('loadingDetails')}</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -606,12 +618,12 @@ function AppContent() {
                       <div className="flex-1">
                         <h3 className="text-xl font-bold text-gray-900 mb-2">{selectedGame.title}</h3>
                         <div className="space-y-1 text-sm text-gray-600">
-                          <p><span className="font-medium">Year:</span> {selectedGame.release_year}</p>
-                          <p><span className="font-medium">Players:</span> {selectedGame.min_players}-{selectedGame.max_players}</p>
-                          <p><span className="font-medium">Time:</span> {selectedGame.play_time} minutes</p>
-                          <p><span className="font-medium">Complexity:</span> {selectedGame.complexity_rating.toFixed(1)}/5</p>
+                          <p><span className="font-medium">{t('year')}:</span> {selectedGame.release_year}</p>
+                          <p><span className="font-medium">{t('players')}:</span> {selectedGame.min_players}-{selectedGame.max_players}</p>
+                          <p><span className="font-medium">{t('time')}:</span> {selectedGame.play_time} {t('min')}</p>
+                          <p><span className="font-medium">{t('complexity')}:</span> {selectedGame.complexity_rating.toFixed(1)}/5</p>
                           {selectedGame.authors.length > 0 && (
-                            <p><span className="font-medium">Designer:</span> {selectedGame.authors.join(', ')}</p>
+                            <p><span className="font-medium">{t('designer')}:</span> {selectedGame.authors.join(', ')}</p>
                           )}
                         </div>
                       </div>
@@ -619,7 +631,7 @@ function AppContent() {
 
                     {selectedGame.categories.length > 0 && (
                       <div>
-                        <span className="font-medium text-gray-700">Categories: </span>
+                        <span className="font-medium text-gray-700">{t('categories')}: </span>
                         <div className="inline-flex flex-wrap gap-1 mt-1">
                           {selectedGame.categories.map((category, index) => (
                             <span key={index} className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
@@ -632,7 +644,7 @@ function AppContent() {
 
                     {selectedGame.description && (
                       <div>
-                        <span className="font-medium text-gray-700">Description:</span>
+                        <span className="font-medium text-gray-700">{t('description')}:</span>
                         <p className="text-sm text-gray-600 mt-1 max-h-32 overflow-y-auto">
                           {selectedGame.description}
                         </p>
@@ -644,13 +656,13 @@ function AppContent() {
                         onClick={() => setSelectedGame(null)}
                         className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
                       >
-                        Back to Search
+                        {t('backToSearch')}
                       </button>
                       <button
                         onClick={() => addGameToCollection(selectedGame)}
                         className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                       >
-                        Add to Collection
+                        {t('addToCollection')}
                       </button>
                     </div>
                   </div>
@@ -669,6 +681,14 @@ function AppContent() {
         onConfirm={borrowGame}
       />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <LanguageProvider>
+      <AppContent />
+    </LanguageProvider>
   );
 }
 
