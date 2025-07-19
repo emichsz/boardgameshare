@@ -648,6 +648,157 @@ function AppContent() {
     );
   };
 
+  const GameDetailsModal = ({ show, game, onClose }) => {
+    if (!show || !game) return null;
+
+    const displayTitle = language === 'hu' && game.title_hu ? game.title_hu : game.title;
+    const displayDescription = language === 'hu' && game.description_hu ? game.description_hu : game.description;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="bg-white rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">{t('gameDetails')}</h2>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Játék képe és alapadatok */}
+            <div className="md:col-span-1">
+              <img
+                src={game.cover_image || '/api/placeholder/300/400'}
+                alt={displayTitle}
+                className="w-full rounded-lg shadow-lg"
+                onError={(e) => {
+                  e.target.src = '/api/placeholder/300/400';
+                }}
+              />
+              
+              <div className="mt-4 space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    game.status === 'available' 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-orange-100 text-orange-800'
+                  }`}>
+                    {game.status === 'available' ? t('statusAvailable') : t('statusBorrowed')}
+                  </div>
+                  <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    game.language === 'hu' ? 'bg-red-100 text-red-800' :
+                    game.language === 'multilang' ? 'bg-green-100 text-green-800' :
+                    'bg-blue-100 text-blue-800'
+                  }`}>
+                    {game.language === 'hu' ? t('hungarian') :
+                     game.language === 'multilang' ? t('multilingual') : t('english')}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Játék részletek */}
+            <div className="md:col-span-2">
+              <h1 className="text-3xl font-bold text-gray-900 mb-4">{displayTitle}</h1>
+              
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <div className="text-sm text-gray-600">{t('year')}</div>
+                  <div className="font-semibold">{game.release_year}</div>
+                </div>
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <div className="text-sm text-gray-600">{t('players')}</div>
+                  <div className="font-semibold">{game.min_players}-{game.max_players}</div>
+                </div>
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <div className="text-sm text-gray-600">{t('time')}</div>
+                  <div className="font-semibold">{game.play_time} {t('min')}</div>
+                </div>
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <div className="text-sm text-gray-600">{t('complexity')}</div>
+                  <div className="font-semibold">{game.complexity_rating.toFixed(1)}/5</div>
+                </div>
+              </div>
+
+              {game.authors.length > 0 && (
+                <div className="mb-4">
+                  <h3 className="font-medium text-gray-900 mb-2">{t('designer')}</h3>
+                  <p className="text-gray-600">{game.authors.join(', ')}</p>
+                </div>
+              )}
+
+              {game.categories.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="font-medium text-gray-900 mb-2">{t('categories')}</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {game.categories.map((category, index) => (
+                      <span key={index} className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">
+                        {category}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {displayDescription && (
+                <div className="mb-6">
+                  <h3 className="font-medium text-gray-900 mb-2">{t('description')}</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">{displayDescription}</p>
+                </div>
+              )}
+
+              {game.status === 'borrowed' && (
+                <div className="bg-orange-50 p-4 rounded-lg mb-6">
+                  <h3 className="font-medium text-orange-900 mb-2">{t('statusBorrowed')}</h3>
+                  <p className="text-orange-700"><span className="font-medium">{t('borrowedBy')}:</span> {game.borrowed_by}</p>
+                  <p className="text-orange-700"><span className="font-medium">{t('returnDate')}:</span> {formatDate(game.return_date)}</p>
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <a
+                  href={game.rules_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-center font-medium hover:bg-blue-700 transition-colors"
+                >
+                  {t('rulesLink')}
+                </a>
+                
+                {game.status === 'available' ? (
+                  <button
+                    onClick={() => {
+                      setBorrowModal({ show: true, game });
+                      onClose();
+                    }}
+                    className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors"
+                  >
+                    {t('lendGame')}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      returnGame(game.id);
+                      onClose();
+                    }}
+                    className="flex-1 bg-yellow-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-yellow-700 transition-colors"
+                  >
+                    {t('markReturned')}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-100">
       {/* Header */}
