@@ -357,6 +357,7 @@ function AppContent() {
       // Alapértelmezett nyelvi beállítások a felhasználó nyelvének megfelelően
       if (!gameData.title_hu) gameData.title_hu = '';
       if (!gameData.description_hu) gameData.description_hu = '';
+      if (!gameData.personal_notes) gameData.personal_notes = '';
       
       // Ha magyar felületen keresünk, alapértelmezett nyelv legyen magyar
       if (!gameData.language) {
