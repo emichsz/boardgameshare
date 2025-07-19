@@ -1166,6 +1166,9 @@ function AppContent() {
           </div>
         </div>
 
+        {/* Advanced Filters */}
+        {showAdvancedFilters && <AdvancedFilters />}
+
         {/* Games Display */}
         {games.length === 0 ? (
           <div className="text-center py-12">
