@@ -173,6 +173,23 @@ const translations = {
     failedToDelete: 'Failed to delete game',
     confirmDelete: 'Are you sure you want to remove this game from your collection?',
     
+    // Advanced filters
+    advancedFilters: 'Advanced Filters',
+    showFilters: 'Show Filters',
+    hideFilters: 'Hide Filters',
+    minPlayers: 'Min. Players',
+    maxPlayers: 'Max. Players',
+    minTime: 'Min. Time (min)',
+    maxTime: 'Max. Time (min)',
+    minComplexity: 'Min. Complexity',
+    maxComplexity: 'Max. Complexity',
+    minYear: 'Earliest Year',
+    maxYear: 'Latest Year',
+    categoryFilter: 'Category',
+    designerFilter: 'Designer',
+    clearFilters: 'Clear Filters',
+    applyFilters: 'Apply Filters',
+    
     // View toggle
     gridView: 'Grid View',
     listView: 'List View',
