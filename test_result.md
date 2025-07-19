@@ -131,15 +131,18 @@ backend:
 
   - task: "Game Lending System"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "NA"
         - agent: "main"
         - comment: "Implemented borrow/return game endpoints with borrower tracking and return dates"
+        - working: true
+        - agent: "testing"
+        - comment: "✅ COMPREHENSIVE TESTING PASSED: PUT /api/games/{id}/borrow successfully marks games as borrowed with borrower name and return date tracking. PUT /api/games/{id}/return properly returns games to available status and clears borrower data. Complete lending workflow tested: add game → borrow → verify status → return → verify available. All lending functionality working perfectly."
 
   - task: "Search and Filtering"
     implemented: true
