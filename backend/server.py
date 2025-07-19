@@ -354,18 +354,30 @@ async def return_game(game_id: str):
         logger.error(f"Error returning game: {e}")
         raise HTTPException(status_code=500, detail="Failed to update game status")
 
-@app.put("/api/games/{game_id}", response_model=GameDetails)
-async def update_game(game_id: str, game_data: GameDetails):
+@app.put("/api/games/{game_id}")
+async def update_game(game_id: str, update_data: dict):
     """Update a game in the collection"""
     try:
-        # Exclude None values and prepare update data
-        update_data = {k: v for k, v in game_data.dict().items() if v is not None}
+        logger.info(f"Updating game {game_id} with data: {update_data}")
+        
+        # Clean up the update data - remove None values and convert dates
+        cleaned_data = {}
+        for key, value in update_data.items():
+            if value is not None:
+                if key in ['borrowed_date', 'return_date'] and isinstance(value, str):
+                    # Skip datetime conversion for now, just use string
+                    continue
+                cleaned_data[key] = value
+        
+        logger.info(f"Cleaned update data: {cleaned_data}")
         
         # Update the game in the database
         result = await db.games.update_one(
             {"id": game_id},
-            {"$set": update_data}
+            {"$set": cleaned_data}
         )
+        
+        logger.info(f"Update result: matched={result.matched_count}, modified={result.modified_count}")
         
         if result.matched_count == 0:
             raise HTTPException(status_code=404, detail="Game not found")
@@ -376,7 +388,7 @@ async def update_game(game_id: str, game_data: GameDetails):
             updated_game["id"] = str(updated_game.get("_id", updated_game.get("id", "")))
             if "_id" in updated_game:
                 del updated_game["_id"]
-            return GameDetails(**updated_game)
+            return updated_game
         
         raise HTTPException(status_code=404, detail="Game not found")
         
