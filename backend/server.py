@@ -401,7 +401,7 @@ async def delete_game(game_id: str):
     """Remove a game from the collection"""
     try:
         logger.info(f"Deleting game with ID: {game_id}")
-        result = await db.games.delete_one({"id": game_id})
+        result = await db.games.delete_one({"$or": [{"id": game_id}, {"_id": game_id}]})
         logger.info(f"Delete result: deleted_count={result.deleted_count}")
         
         if result.deleted_count == 0:
