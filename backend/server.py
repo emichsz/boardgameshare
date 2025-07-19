@@ -15,6 +15,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from pymongo import MongoClient
 from motor.motor_asyncio import AsyncIOMotorClient
+from bson import ObjectId
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
