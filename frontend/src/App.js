@@ -270,13 +270,13 @@ function AppContent() {
 
   // Delete game
   const deleteGame = async (gameId) => {
-    if (window.confirm('Are you sure you want to remove this game from your collection?')) {
+    if (window.confirm(t('confirmDelete'))) {
       try {
         await axios.delete(`${API_BASE_URL}/api/games/${gameId}`);
         await fetchGames();
       } catch (error) {
         console.error('Error deleting game:', error);
-        alert('Failed to delete game');
+        alert(t('failedToDelete'));
       }
     }
   };
