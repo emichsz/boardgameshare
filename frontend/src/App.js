@@ -1106,6 +1106,13 @@ function AppContent() {
         </div>
       )}
 
+      {/* Game Details Modal */}
+      <GameDetailsModal
+        show={detailsModal.show}
+        game={detailsModal.game}
+        onClose={() => setDetailsModal({ show: false, game: null })}
+      />
+
       {/* Borrow Modal */}
       <BorrowModal
         show={borrowModal.show}
