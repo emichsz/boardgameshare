@@ -382,8 +382,8 @@ async def update_game(game_id: str, update_data: dict):
         if result.matched_count == 0:
             raise HTTPException(status_code=404, detail="Game not found")
         
-        # Return updated game
-        updated_game = await db.games.find_one({"id": game_id})
+        # Return updated game - try both id fields
+        updated_game = await db.games.find_one({"$or": [{"id": game_id}, {"_id": game_id}]})
         if updated_game:
             updated_game["id"] = str(updated_game.get("_id", updated_game.get("id", "")))
             if "_id" in updated_game:
