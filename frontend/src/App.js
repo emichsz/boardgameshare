@@ -48,9 +48,19 @@ const translations = {
     year: 'Év',
     categories: 'Kategóriák',
     description: 'Leírás',
+    language: 'Nyelv',
     backToSearch: 'Vissza a kereséshez',
     addToCollection: 'Hozzáadás a gyűjteményhez',
     loadingDetails: 'Játék részletek betöltése...',
+    
+    // Magyar lokalizáció mezők
+    hungarianTitle: 'Magyar cím',
+    hungarianDescription: 'Magyar leírás',
+    gameLanguage: 'Játék nyelve',
+    hungarian: 'Magyar',
+    english: 'Angol',
+    multilingual: 'Többnyelvű',
+    optional: '(opcionális)',
     
     // Kölcsönzés modal
     lendGameTitle: 'Játék kölcsönadása',
