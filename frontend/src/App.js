@@ -77,9 +77,15 @@ const translations = {
     failedToDelete: 'Nem sikerült törölni a játékot',
     confirmDelete: 'Biztosan el szeretnéd távolítani ezt a játékot a gyűjteményből?',
     
-    // Állapotok
-    statusAvailable: 'Elérhető',
-    statusBorrowed: 'Kölcsönadva'
+    // Nézet váltás
+    gridView: 'Rács nézet',
+    listView: 'Lista nézet',
+    
+    // Játék részletek modal
+    gameDetails: 'Játék részletei',
+    rulesLink: 'Játékszabályok',
+    website: 'Weboldal',
+    close: 'Bezárás',
   },
   en: {
     // Header
