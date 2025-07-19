@@ -937,6 +937,135 @@ function AppContent() {
     );
   };
 
+  const EditGameModal = ({ show, game, onClose, onSave }) => {
+    const [editedGame, setEditedGame] = useState(null);
+
+    useEffect(() => {
+      if (game) {
+        setEditedGame({
+          ...game,
+          title_hu: game.title_hu || '',
+          description_hu: game.description_hu || '',
+          personal_notes: game.personal_notes || ''
+        });
+      }
+    }, [game]);
+
+    if (!show || !editedGame) return null;
+
+    const handleSave = () => {
+      onSave(editedGame);
+    };
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">{t('editGame')}</h2>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="space-y-6">
+            <div className="flex gap-4">
+              <img
+                src={editedGame.cover_image || '/api/placeholder/120/160'}
+                alt={editedGame.title}
+                className="w-20 h-28 object-cover rounded-lg"
+                onError={(e) => {
+                  e.target.src = '/api/placeholder/120/160';
+                }}
+              />
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-gray-900 mb-2">{editedGame.title}</h3>
+                <p className="text-sm text-gray-600">BGG ID: {editedGame.bgg_id}</p>
+              </div>
+            </div>
+
+            {/* Magyar cím szerkesztése */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('hungarianTitle')} {t('optional')}
+              </label>
+              <input
+                type="text"
+                value={editedGame.title_hu}
+                onChange={(e) => setEditedGame({...editedGame, title_hu: e.target.value})}
+                placeholder={editedGame.title}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            {/* Játék nyelve */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('gameLanguage')}
+              </label>
+              <select
+                value={editedGame.language}
+                onChange={(e) => setEditedGame({...editedGame, language: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="hu">{t('hungarian')}</option>
+                <option value="en">{t('english')}</option>
+                <option value="multilang">{t('multilingual')}</option>
+              </select>
+            </div>
+
+            {/* Magyar leírás */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('hungarianDescription')} {t('optional')}
+              </label>
+              <textarea
+                value={editedGame.description_hu}
+                onChange={(e) => setEditedGame({...editedGame, description_hu: e.target.value})}
+                placeholder={editedGame.description.substring(0, 100) + '...'}
+                rows={4}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            {/* Saját megjegyzések */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('personalNotes')}
+              </label>
+              <textarea
+                value={editedGame.personal_notes}
+                onChange={(e) => setEditedGame({...editedGame, personal_notes: e.target.value})}
+                placeholder={language === 'hu' ? 'Saját észrevételeid, tapasztalataid erről a játékról...' : 'Your personal thoughts and experiences about this game...'}
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <button
+                onClick={onClose}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+              >
+                {t('cancel')}
+              </button>
+              <button
+                onClick={handleSave}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                {t('saveChanges')}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const GameDetailsModal = ({ show, game, onClose }) => {
     if (!show || !game) return null;
 
