@@ -1170,6 +1170,13 @@ function AppContent() {
                 </div>
               )}
 
+              {game.personal_notes && (
+                <div className="mb-6 bg-yellow-50 p-4 rounded-lg">
+                  <h3 className="font-medium text-yellow-900 mb-2">{t('personalNotes')}</h3>
+                  <p className="text-yellow-800 text-sm leading-relaxed">{game.personal_notes}</p>
+                </div>
+              )}
+
               {game.status === 'borrowed' && (
                 <div className="bg-orange-50 p-4 rounded-lg mb-6">
                   <h3 className="font-medium text-orange-900 mb-2">{t('statusBorrowed')}</h3>
