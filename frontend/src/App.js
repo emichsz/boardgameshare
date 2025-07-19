@@ -123,9 +123,19 @@ const translations = {
     year: 'Year',
     categories: 'Categories',
     description: 'Description',
+    language: 'Language',
     backToSearch: 'Back to Search',
     addToCollection: 'Add to Collection',
     loadingDetails: 'Loading game details...',
+    
+    // Hungarian localization fields
+    hungarianTitle: 'Hungarian Title',
+    hungarianDescription: 'Hungarian Description',
+    gameLanguage: 'Game Language',
+    hungarian: 'Hungarian',
+    english: 'English',
+    multilingual: 'Multilingual',
+    optional: '(optional)',
     
     // Borrow modal
     lendGameTitle: 'Lend Game',
