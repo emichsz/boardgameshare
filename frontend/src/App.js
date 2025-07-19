@@ -217,6 +217,19 @@ function AppContent() {
   const [borrowModal, setBorrowModal] = useState({ show: false, game: null });
   const [viewMode, setViewMode] = useState('grid'); // 'grid' vagy 'list'
   const [detailsModal, setDetailsModal] = useState({ show: false, game: null });
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [advancedFilters, setAdvancedFilters] = useState({
+    minPlayers: '',
+    maxPlayers: '',
+    minTime: '',
+    maxTime: '',
+    minComplexity: '',
+    maxComplexity: '',
+    minYear: '',
+    maxYear: '',
+    category: '',
+    designer: ''
+  });
 
   // Fetch user's game collection
   const fetchGames = async () => {
