@@ -401,20 +401,14 @@ function AppContent() {
     }
   };
 
-  // Delete game - most console.log-gal debugoljuk
+  // Delete game
   const deleteGame = async (gameId) => {
-    console.log('Delete game called with ID:', gameId);
-    if (window.confirm(t('confirmDelete'))) {
-      try {
-        console.log('Making DELETE request to:', `${API_BASE_URL}/api/games/${gameId}`);
-        const response = await axios.delete(`${API_BASE_URL}/api/games/${gameId}`);
-        console.log('Delete response:', response);
-        await fetchGames();
-        console.log('Games refetched after delete');
-      } catch (error) {
-        console.error('Error deleting game:', error);
-        alert(t('failedToDelete'));
-      }
+    try {
+      await axios.delete(`${API_BASE_URL}/api/games/${gameId}`);
+      await fetchGames();
+    } catch (error) {
+      console.error('Error deleting game:', error);
+      alert(t('failedToDelete'));
     }
   };
 
