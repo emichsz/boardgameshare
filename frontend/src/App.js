@@ -419,6 +419,7 @@ function App() {
                 </div>
 
                 {/* Search Results */}
+                {console.log('Rendering search results, length:', searchResults.length)}
                 {searchResults.length > 0 && (
                   <div className="space-y-2">
                     <h3 className="font-medium text-gray-900">Search Results:</h3>
