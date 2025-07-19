@@ -639,58 +639,84 @@ function AppContent() {
     };
 
     const displayTitle = language === 'hu' && game.title_hu ? game.title_hu : game.title;
+    const displayDescription = language === 'hu' && game.description_hu ? game.description_hu : game.description;
 
     return (
       <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
         <div 
-          className="cursor-pointer"
+          className="cursor-pointer relative"
           onClick={() => setDetailsModal({ show: true, game })}
         >
-          <div className="aspect-w-3 aspect-h-4 relative">
+          {/* Négyzetes játék kép */}
+          <div className="aspect-square relative">
             <img
-              src={game.cover_image || '/api/placeholder/300/400'}
+              src={game.cover_image || '/api/placeholder/300/300'}
               alt={displayTitle}
-              className="w-full h-48 object-cover"
+              className="w-full h-full object-cover"
               onError={(e) => {
-                e.target.src = '/api/placeholder/300/400';
+                e.target.src = '/api/placeholder/300/300';
               }}
             />
-            <div className="absolute top-2 right-2 flex flex-col gap-1">
-              <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                game.status === 'available' 
-                  ? 'bg-green-100 text-green-800' 
-                  : 'bg-orange-100 text-orange-800'
-              }`}>
-                {game.status === 'available' ? t('statusAvailable') : t('statusBorrowed')}
-              </div>
-              <div className={`px-2 py-1 rounded-full text-xs font-medium ${getLanguageColor(game.language)}`}>
-                {getLanguageLabel(game.language)}
-              </div>
-            </div>
-          </div>
-          
-          <div className="p-4">
-            <h3 className="font-bold text-lg text-gray-900 mb-2 line-clamp-2">{displayTitle}</h3>
             
-            <div className="space-y-2 text-sm text-gray-600 mb-4">
-              <p><span className="font-medium">{t('players')}:</span> {game.min_players}-{game.max_players}</p>
-              <p><span className="font-medium">{t('time')}:</span> {game.play_time} {t('min')}</p>
-              <p><span className="font-medium">{t('complexity')}:</span> {game.complexity_rating.toFixed(1)}/5</p>
-              {game.authors.length > 0 && (
-                <p><span className="font-medium">{t('designer')}:</span> {game.authors.join(', ')}</p>
+            {/* Overlay információk a képen */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent">
+              {/* BGG értékelés bal felső */}
+              {game.complexity_rating > 0 && (
+                <div className="absolute top-2 left-2 bg-yellow-500 text-black px-2 py-1 rounded-full text-xs font-bold">
+                  ⭐ {game.complexity_rating.toFixed(1)}
+                </div>
               )}
-            </div>
-
-            {game.status === 'borrowed' && (
-              <div className="bg-orange-50 p-2 rounded-lg mb-3 text-sm">
-                <p><span className="font-medium">{t('borrowedBy')}:</span> {game.borrowed_by}</p>
-                <p><span className="font-medium">{t('returnDate')}:</span> {formatDate(game.return_date)}</p>
+              
+              {/* Játékosok száma és idő jobb felső */}
+              <div className="absolute top-2 right-2 text-right">
+                <div className="bg-black/70 text-white px-2 py-1 rounded-full text-xs font-medium mb-1">
+                  👥 {game.min_players}-{game.max_players}
+                </div>
+                <div className="bg-black/70 text-white px-2 py-1 rounded-full text-xs font-medium">
+                  ⏱️ {game.play_time}{t('min')}
+                </div>
               </div>
-            )}
+
+              {/* Állapot és nyelvi jelzők bal alsó */}
+              <div className="absolute bottom-2 left-2 flex flex-col gap-1">
+                <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  game.status === 'available' 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'bg-orange-100 text-orange-800'
+                }`}>
+                  {game.status === 'available' ? t('statusAvailable') : t('statusBorrowed')}
+                </div>
+                <div className={`px-2 py-1 rounded-full text-xs font-medium ${getLanguageColor(game.language)}`}>
+                  {getLanguageLabel(game.language)}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="px-4 pb-4">
+        {/* Játék információk a kép alatt */}
+        <div className="p-4">
+          {/* Játék címe */}
+          <h3 className="font-bold text-lg text-gray-900 mb-2 line-clamp-2 cursor-pointer" onClick={() => setDetailsModal({ show: true, game })}>
+            {displayTitle}
+          </h3>
+          
+          {/* Játék leírása */}
+          {displayDescription && (
+            <p className="text-sm text-gray-600 mb-4 line-clamp-3 leading-relaxed">
+              {displayDescription.length > 150 ? displayDescription.substring(0, 150) + '...' : displayDescription}
+            </p>
+          )}
+
+          {/* Kölcsönzési információ */}
+          {game.status === 'borrowed' && (
+            <div className="bg-orange-50 p-2 rounded-lg mb-3 text-xs">
+              <p><span className="font-medium">{t('borrowedBy')}:</span> {game.borrowed_by}</p>
+              <p><span className="font-medium">{t('returnDate')}:</span> {formatDate(game.return_date)}</p>
+            </div>
+          )}
+
+          {/* Akció gombok */}
           <div className="flex gap-2">
             {game.status === 'available' ? (
               <button
