@@ -239,7 +239,14 @@ function AppContent() {
     setIsLoadingDetails(true);
     try {
       const response = await axios.get(`${API_BASE_URL}/api/games/details/${bggId}`);
-      setSelectedGame(response.data);
+      const gameData = response.data;
+      
+      // Alapértelmezett nyelvi beállítások
+      if (!gameData.title_hu) gameData.title_hu = '';
+      if (!gameData.description_hu) gameData.description_hu = '';
+      if (!gameData.language) gameData.language = 'en';
+      
+      setSelectedGame(gameData);
     } catch (error) {
       console.error('Error fetching game details:', error);
     }
