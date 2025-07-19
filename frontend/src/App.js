@@ -96,6 +96,13 @@ const translations = {
     gridView: 'Rács nézet',
     listView: 'Lista nézet',
     
+    // Játék szerkesztés
+    editGame: 'Játék szerkesztése',
+    saveChanges: 'Változtatások mentése',
+    personalNotes: 'Saját megjegyzések',
+    editTitle: 'Cím szerkesztése',
+    editDescription: 'Leírás szerkesztése',
+    
     // Játék részletek modal
     gameDetails: 'Játék részletei',
     rulesLink: 'Játékszabályok',
