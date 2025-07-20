@@ -398,19 +398,23 @@ async def get_game_details(bgg_id: str):
         raise HTTPException(status_code=502, detail="Invalid response from BoardGameGeek")
 
 @app.post("/api/games", response_model=GameDetails)
-async def add_game_to_collection(game_data: GameDetails):
+async def add_game_to_collection(game_data: GameDetails, current_user: User = Depends(get_current_user)):
     """Add a game to the collection"""
     try:
-        # Check if game already exists
-        existing = await db.games.find_one({"bgg_id": game_data.bgg_id})
+        # Set owner information
+        game_data.owner_id = current_user.id
+        game_data.owner_name = current_user.name
+        
+        # Check if game already exists for this user
+        existing = await db.games.find_one({"bgg_id": game_data.bgg_id, "owner_id": current_user.id})
         if existing:
-            raise HTTPException(status_code=409, detail="Game already in collection")
+            raise HTTPException(status_code=409, detail="Game already in your collection")
         
         # Save to database
         game_dict = game_data.dict()
         await db.games.insert_one(game_dict)
         
-        logger.info(f"Added game: {game_data.title}")
+        logger.info(f"Added game: {game_data.title} for user: {current_user.name}")
         return game_data
         
     except Exception as e:
@@ -421,11 +425,16 @@ async def add_game_to_collection(game_data: GameDetails):
 async def get_collection(
     status: Optional[str] = None,
     category: Optional[str] = None,
-    search: Optional[str] = None
+    search: Optional[str] = None,
+    owner_only: Optional[bool] = False,
+    current_user: User = Depends(get_current_user)
 ):
-    """Get user's game collection with optional filtering"""
+    """Get games collection with optional filtering"""
     
     query = {}
+    if owner_only:
+        query["owner_id"] = current_user.id
+    
     if status:
         query["status"] = status
     if search:
@@ -453,6 +462,40 @@ async def get_collection(
     except Exception as e:
         logger.error(f"Error fetching collection: {e}")
         raise HTTPException(status_code=500, detail="Failed to fetch collection")
+
+@app.post("/api/games/{game_id}/add-to-my-collection")
+async def add_existing_game_to_my_collection(game_id: str, current_user: User = Depends(get_current_user)):
+    """Add an existing game to current user's collection"""
+    try:
+        # Find the original game
+        original_game = await db.games.find_one({"id": game_id})
+        if not original_game:
+            raise HTTPException(status_code=404, detail="Game not found")
+        
+        # Check if user already has this game
+        existing = await db.games.find_one({"bgg_id": original_game["bgg_id"], "owner_id": current_user.id})
+        if existing:
+            raise HTTPException(status_code=409, detail="Game already in your collection")
+        
+        # Create new game instance for current user
+        new_game = GameDetails(**original_game)
+        new_game.id = str(uuid.uuid4())
+        new_game.owner_id = current_user.id
+        new_game.owner_name = current_user.name
+        new_game.status = "available"
+        new_game.borrowed_by = None
+        new_game.borrowed_date = None
+        new_game.return_date = None
+        new_game.personal_notes = None
+        
+        # Save to database
+        await db.games.insert_one(new_game.dict())
+        
+        return {"message": "Game added to your collection successfully"}
+        
+    except Exception as e:
+        logger.error(f"Error adding existing game: {e}")
+        raise HTTPException(status_code=500, detail="Failed to add game to your collection")
 
 @app.put("/api/games/{game_id}/borrow", response_model=GameDetails)
 async def borrow_game(game_id: str, borrow_request: BorrowRequest):
