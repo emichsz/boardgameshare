@@ -35,11 +35,28 @@ GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "GOCSPX-f1BS7n1nF-c2nUm
 # Cache for BGG API responses (24 hour TTL)
 game_cache = TTLCache(maxsize=1000, ttl=86400)
 
+# OAuth setup
+oauth = OAuth()
+
+# Security
+security = HTTPBearer()
+
 # MongoDB client
 mongo_client = AsyncIOMotorClient(MONGO_URL)
 db = mongo_client[DB_NAME]
 
 # Pydantic models
+class User(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    google_id: str
+    email: str
+    name: str
+    picture: Optional[str] = None
+    address: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.now)
+
+class GoogleAuthRequest(BaseModel):
+    credential: str
 class GameSearch(BaseModel):
     id: str
     name: str
