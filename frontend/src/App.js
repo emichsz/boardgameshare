@@ -206,6 +206,13 @@ const translations = {
     gridView: 'Grid View',
     listView: 'List View',
     
+    // Age rating
+    minAge: 'Age Rating',
+    ageYears: 'years+',
+    
+    // Short descriptions
+    shortDescription: 'Short Description',
+    
     // Game edit
     editGame: 'Edit Game',
     saveChanges: 'Save Changes',
