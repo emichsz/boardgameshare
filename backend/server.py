@@ -423,6 +423,8 @@ async def get_game_details(bgg_id: str):
             categories=categories[:5],  # Limit to 5 categories
             description=full_description,
             description_short=short_description,
+            owner_id="",  # Empty for BGG details endpoint
+            owner_name=""  # Empty for BGG details endpoint
         )
         
         # Cache the result
