@@ -574,7 +574,7 @@ async def borrow_game(game_id: str, borrow_request: BorrowRequest, current_user:
         raise HTTPException(status_code=500, detail="Failed to update game status")
 
 @app.put("/api/games/{game_id}/return", response_model=GameDetails)
-async def return_game(game_id: str):
+async def return_game(game_id: str, current_user: User = Depends(get_current_user)):
     """Mark a game as returned"""
     try:
         result = await db.games.update_one(
