@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { GoogleOAuthProvider, useGoogleLogin, googleLogout } from '@react-oauth/google';
+import { GoogleOAuthProvider, GoogleLogin, googleLogout } from '@react-oauth/google';
 import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
@@ -33,7 +33,7 @@ function AuthProviderBase({ children }) {
           axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
           
           // Verify token with backend
-          const response = await axios.get(`${API_BASE_URL}/api/profile`);
+          const response = await axios.get(`${API_BASE_URL}/api/auth/me`);
           setUser(response.data);
         }
       } catch (error) {
@@ -48,41 +48,40 @@ function AuthProviderBase({ children }) {
     checkExistingSession();
   }, []);
 
-  // Google login function
-  const loginWithGoogle = useGoogleLogin({
-    onSuccess: async (codeResponse) => {
-      try {
-        setError(null);
-        console.log('Google login success:', codeResponse);
-        
-        // Send the authorization code to backend
-        const response = await axios.post(`${API_BASE_URL}/api/auth/google`, {
-          credential: codeResponse.access_token,
-          code: codeResponse.code
-        });
+  // Google login success handler
+  const handleGoogleLoginSuccess = async (credentialResponse) => {
+    try {
+      setError(null);
+      console.log('Google login success:', credentialResponse);
+      
+      // Send the credential (id_token) to backend
+      const response = await axios.post(`${API_BASE_URL}/api/auth/google`, {
+        credential: credentialResponse.credential
+      });
 
-        const { access_token, user: userData } = response.data;
-        
-        // Store token in localStorage
-        localStorage.setItem('auth_token', access_token);
-        
-        // Set axios default header
-        axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
-        
-        // Set user data
-        setUser(userData);
-        
-        console.log('Login successful:', userData);
-      } catch (error) {
-        console.error('Login error:', error);
-        setError('Bejelentkezés sikertelen. Kérjük próbálja újra!');
-      }
-    },
-    onError: (error) => {
-      console.error('Google login error:', error);
-      setError('Google bejelentkezés sikertelen.');
-    },
-  });
+      const { access_token, user: userData } = response.data;
+      
+      // Store token in localStorage
+      localStorage.setItem('auth_token', access_token);
+      
+      // Set axios default header
+      axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+      
+      // Set user data
+      setUser(userData);
+      
+      console.log('Login successful:', userData);
+    } catch (error) {
+      console.error('Login error:', error);
+      setError('Bejelentkezés sikertelen. Kérjük próbálja újra!');
+    }
+  };
+
+  // Google login error handler
+  const handleGoogleLoginError = (error) => {
+    console.error('Google login error:', error);
+    setError('Google bejelentkezés sikertelen.');
+  };
 
   // Logout function
   const logout = () => {
@@ -111,7 +110,8 @@ function AuthProviderBase({ children }) {
     user,
     loading,
     error,
-    loginWithGoogle,
+    handleGoogleLoginSuccess,
+    handleGoogleLoginError,
     logout,
     isAuthenticated: !!user,
     setError
