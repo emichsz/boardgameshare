@@ -465,23 +465,36 @@ async def get_collection(
     status: Optional[str] = None,
     category: Optional[str] = None,
     search: Optional[str] = None,
-    owner_only: Optional[bool] = False,
+    owner_only: Optional[bool] = True,  # Alapértelmezetten csak saját játékok
     current_user: User = Depends(get_current_user)
 ):
     """Get games collection with optional filtering"""
     
     query = {}
     if owner_only:
-        query["owner_id"] = current_user.id
+        # Csak a felhasználó saját játékait vagy azokat, amelyekhez még nincs tulajdonos megadva
+        query["$or"] = [
+            {"owner_id": current_user.id},
+            {"owner_id": {"$exists": False}},
+            {"owner_id": None},
+            {"owner_id": ""}
+        ]
     
     if status:
         query["status"] = status
     if search:
-        query["$or"] = [
-            {"title": {"$regex": search, "$options": "i"}},
-            {"authors": {"$regex": search, "$options": "i"}},
-            {"categories": {"$regex": search, "$options": "i"}}
-        ]
+        search_query = {
+            "$or": [
+                {"title": {"$regex": search, "$options": "i"}},
+                {"authors": {"$regex": search, "$options": "i"}},
+                {"categories": {"$regex": search, "$options": "i"}}
+            ]
+        }
+        if "$or" in query:
+            # Kombináljuk a tulajdonos és keresési feltételeket
+            query = {"$and": [{"$or": query["$or"]}, search_query]}
+        else:
+            query.update(search_query)
     
     try:
         cursor = db.games.find(query)
@@ -490,6 +503,17 @@ async def get_collection(
             game["id"] = str(game.get("_id", game.get("id", "")))
             if "_id" in game:
                 del game["_id"]
+                
+            # Ha nincs tulajdonos beállítva, állítsuk be a jelenlegi felhasználót
+            if not game.get("owner_id"):
+                game["owner_id"] = current_user.id
+                game["owner_name"] = current_user.name
+                # Frissítsük az adatbázist is
+                await db.games.update_one(
+                    {"_id": ObjectId(game["id"]) if ObjectId.is_valid(game["id"]) else game["id"]},
+                    {"$set": {"owner_id": current_user.id, "owner_name": current_user.name}}
+                )
+                
             games.append(GameDetails(**game))
         
         # Filter by category if specified
