@@ -407,9 +407,15 @@ function AppContent() {
     setIsSearching(true);
     try {
       const response = await axios.get(`${API_BASE_URL}/api/games/search/${encodeURIComponent(query)}`);
-      setSearchResults(response.data);
+      // HTML entitások dekódolása a keresési eredményekben is
+      const decodedResults = response.data.map(game => ({
+        ...game,
+        name: decodeHtmlEntities(game.name)
+      }));
+      setSearchResults(decodedResults);
     } catch (error) {
       console.error('Error searching games:', error);
+      alert('Hiba a keresés során: ' + (error.response?.data?.detail || error.message));
       setSearchResults([]);
     }
     setIsSearching(false);
