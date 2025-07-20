@@ -464,26 +464,33 @@ async def get_game_details(bgg_id: str):
         # Check if the game language should be Hungarian (based on some criteria)
         # For now, we'll check if this is for a Hungarian game context
         
-        # If we want to provide Hungarian translations, translate the title and descriptions
-        try:
-            # Translate title to Hungarian
-            hungarian_title = await translate_to_hungarian(game_details.title)
-            game_details.title_hu = hungarian_title
-            
-            # Translate descriptions to Hungarian
-            if game_details.description:
-                hungarian_description = await translate_to_hungarian(game_details.description)
-                game_details.description_hu = hungarian_description
+        # Only translate if we have OpenAI configured
+        if openai_client:
+            try:
+                # Always provide Hungarian translations for games
+                # This will be useful when user selects Hungarian language for the game
+                hungarian_title = await translate_to_hungarian(game_details.title)
+                game_details.title_hu = hungarian_title
                 
-            if game_details.description_short:
-                hungarian_short_description = await translate_to_hungarian(game_details.description_short)
-                game_details.description_short_hu = hungarian_short_description
+                # Translate descriptions to Hungarian
+                if game_details.description:
+                    hungarian_description = await translate_to_hungarian(game_details.description)
+                    game_details.description_hu = hungarian_description
+                    
+                if game_details.description_short:
+                    hungarian_short_description = await translate_to_hungarian(game_details.description_short)
+                    game_details.description_short_hu = hungarian_short_description
+                    
+                logger.info(f"Auto-translated game details to Hungarian: {game_details.title} -> {hungarian_title}")
                 
-            logger.info(f"Auto-translated game details to Hungarian: {game_details.title} -> {hungarian_title}")
-            
-        except Exception as e:
-            logger.warning(f"Failed to auto-translate game details: {e}")
-            # Continue without translation
+            except Exception as e:
+                logger.warning(f"Failed to auto-translate game details: {e}")
+                # Continue without translation
+                game_details.title_hu = ""
+                game_details.description_hu = ""
+                game_details.description_short_hu = ""
+        else:
+            logger.warning("OpenAI not configured, skipping translation")
             game_details.title_hu = ""
             game_details.description_hu = ""
             game_details.description_short_hu = ""
