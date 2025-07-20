@@ -96,7 +96,12 @@ const translations = {
     gridView: 'Rács nézet',
     listView: 'Lista nézet',
     
-    // Játék szerkesztés
+    // Korhatár
+    minAge: 'Korhatár',
+    ageYears: 'éves kortól',
+    
+    // Rövid leírások
+    shortDescription: 'Rövid leírás',
     editGame: 'Játék szerkesztése',
     saveChanges: 'Változtatások mentése',
     personalNotes: 'Saját megjegyzések',
