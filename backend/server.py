@@ -470,6 +470,65 @@ async def delete_game(game_id: str):
         logger.error(f"Error deleting game: {e}")
         raise HTTPException(status_code=500, detail="Failed to delete game")
 
+@app.post("/api/games/refresh-bgg-data")
+async def refresh_bgg_data():
+    """Refresh BGG data for all existing games"""
+    try:
+        games = []
+        async for game in db.games.find():
+            games.append(game)
+        
+        updated_count = 0
+        for game in games:
+            if "bgg_id" in game:
+                try:
+                    # Get fresh data from BGG
+                    xml_content = await fetch_bgg_data(f"/thing?id={game['bgg_id']}&stats=1")
+                    root = etree.fromstring(xml_content)
+                    
+                    item = root.find(".//item")
+                    if item is not None:
+                        # Get BGG rating
+                        rating_elem = item.find(".//statistics/ratings/average")
+                        bgg_rating = float(rating_elem.get("value", 0)) if rating_elem is not None else 0.0
+                        
+                        # Get minimum age
+                        minage_elem = item.find(".//minage")
+                        min_age = int(minage_elem.get("value", 0)) if minage_elem is not None else 0
+                        
+                        # Process description for short version
+                        desc_elem = item.find(".//description")
+                        full_description = clean_html(desc_elem.text if desc_elem is not None else "")
+                        short_description = ""
+                        if full_description:
+                            import re
+                            sentences = re.split(r'[.!?]+', full_description)
+                            if sentences:
+                                short_description = sentences[0].strip() + "."
+                                if len(short_description) > 200:
+                                    short_description = short_description[:200] + "..."
+                        
+                        # Update the game
+                        await db.games.update_one(
+                            {"id": game["id"]},
+                            {"$set": {
+                                "bgg_rating": bgg_rating,
+                                "min_age": min_age,
+                                "description_short": short_description
+                            }}
+                        )
+                        updated_count += 1
+                        
+                except Exception as e:
+                    logger.warning(f"Failed to update game {game.get('title', 'Unknown')}: {e}")
+                    continue
+        
+        return {"message": f"Updated {updated_count} games with fresh BGG data"}
+        
+    except Exception as e:
+        logger.error(f"Error refreshing BGG data: {e}")
+        raise HTTPException(status_code=500, detail="Failed to refresh BGG data")
+
 # Health check
 @app.get("/api/health")
 async def health_check():
