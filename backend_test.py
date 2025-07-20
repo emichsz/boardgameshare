@@ -292,6 +292,254 @@ class BoardGameAPITester:
             self.log_test("Delete Game", False, f"Exception: {str(e)}")
             return False
 
+    def test_authentication_endpoints(self):
+        """Test Google Authentication endpoints"""
+        print("\n🔐 Testing Authentication Endpoints...")
+        
+        # Test 1: Check if /api/auth/google endpoint exists (POST)
+        try:
+            # This should fail with 422 (validation error) since we're not sending proper Google credential
+            test_auth_data = {"credential": "invalid_test_token"}
+            response = self.session.post(f"{API_BASE}/auth/google", json=test_auth_data)
+            
+            if response.status_code in [401, 422]:
+                self.log_test("Auth Endpoint - Google Auth", True, 
+                            f"Endpoint exists and properly validates credentials (HTTP {response.status_code})")
+            else:
+                self.log_test("Auth Endpoint - Google Auth", False, 
+                            f"Unexpected response: HTTP {response.status_code}", response.text)
+        except Exception as e:
+            self.log_test("Auth Endpoint - Google Auth", False, f"Exception: {str(e)}")
+
+        # Test 2: Check if /api/auth/me endpoint exists and requires authentication
+        try:
+            response = self.session.get(f"{API_BASE}/auth/me")
+            
+            if response.status_code == 401:
+                self.log_test("Auth Endpoint - Get Current User", True, 
+                            "Endpoint properly requires authentication (HTTP 401)")
+            elif response.status_code == 403:
+                self.log_test("Auth Endpoint - Get Current User", True, 
+                            "Endpoint properly requires authentication (HTTP 403)")
+            else:
+                self.log_test("Auth Endpoint - Get Current User", False, 
+                            f"Expected 401/403, got HTTP {response.status_code}", response.text)
+        except Exception as e:
+            self.log_test("Auth Endpoint - Get Current User", False, f"Exception: {str(e)}")
+
+        # Test 3: Check if /api/auth/profile endpoint exists and requires authentication
+        try:
+            response = self.session.get(f"{API_BASE}/auth/profile")
+            
+            if response.status_code == 401:
+                self.log_test("Auth Endpoint - Get Profile", True, 
+                            "Endpoint properly requires authentication (HTTP 401)")
+            elif response.status_code == 403:
+                self.log_test("Auth Endpoint - Get Profile", True, 
+                            "Endpoint properly requires authentication (HTTP 403)")
+            else:
+                self.log_test("Auth Endpoint - Get Profile", False, 
+                            f"Expected 401/403, got HTTP {response.status_code}", response.text)
+        except Exception as e:
+            self.log_test("Auth Endpoint - Get Profile", False, f"Exception: {str(e)}")
+
+    def test_protected_game_endpoints(self):
+        """Test that game endpoints now require authentication"""
+        print("\n🛡️ Testing Protected Game Endpoints...")
+        
+        # Test 1: GET /api/games should require authentication
+        try:
+            response = self.session.get(f"{API_BASE}/games")
+            
+            if response.status_code == 401:
+                self.log_test("Protected Endpoint - Get Games", True, 
+                            "GET /api/games properly requires authentication (HTTP 401)")
+            elif response.status_code == 403:
+                self.log_test("Protected Endpoint - Get Games", True, 
+                            "GET /api/games properly requires authentication (HTTP 403)")
+            else:
+                self.log_test("Protected Endpoint - Get Games", False, 
+                            f"Expected 401/403, got HTTP {response.status_code}", response.text)
+        except Exception as e:
+            self.log_test("Protected Endpoint - Get Games", False, f"Exception: {str(e)}")
+
+        # Test 2: POST /api/games should require authentication
+        try:
+            test_game = {
+                "bgg_id": "999999",
+                "title": "Test Game",
+                "authors": ["Test Author"],
+                "min_players": 2,
+                "max_players": 4
+            }
+            response = self.session.post(f"{API_BASE}/games", json=test_game)
+            
+            if response.status_code == 401:
+                self.log_test("Protected Endpoint - Add Game", True, 
+                            "POST /api/games properly requires authentication (HTTP 401)")
+            elif response.status_code == 403:
+                self.log_test("Protected Endpoint - Add Game", True, 
+                            "POST /api/games properly requires authentication (HTTP 403)")
+            else:
+                self.log_test("Protected Endpoint - Add Game", False, 
+                            f"Expected 401/403, got HTTP {response.status_code}", response.text)
+        except Exception as e:
+            self.log_test("Protected Endpoint - Add Game", False, f"Exception: {str(e)}")
+
+        # Test 3: DELETE /api/games/{id} should require authentication
+        try:
+            response = self.session.delete(f"{API_BASE}/games/test-id")
+            
+            if response.status_code == 401:
+                self.log_test("Protected Endpoint - Delete Game", True, 
+                            "DELETE /api/games/{id} properly requires authentication (HTTP 401)")
+            elif response.status_code == 403:
+                self.log_test("Protected Endpoint - Delete Game", True, 
+                            "DELETE /api/games/{id} properly requires authentication (HTTP 403)")
+            else:
+                self.log_test("Protected Endpoint - Delete Game", False, 
+                            f"Expected 401/403, got HTTP {response.status_code}", response.text)
+        except Exception as e:
+            self.log_test("Protected Endpoint - Delete Game", False, f"Exception: {str(e)}")
+
+        # Test 4: PUT /api/games/{id}/borrow should require authentication
+        try:
+            borrow_data = {
+                "game_id": "test-id",
+                "borrower_name": "Test User",
+                "return_date": "2024-12-31"
+            }
+            response = self.session.put(f"{API_BASE}/games/test-id/borrow", json=borrow_data)
+            
+            if response.status_code == 401:
+                self.log_test("Protected Endpoint - Borrow Game", True, 
+                            "PUT /api/games/{id}/borrow properly requires authentication (HTTP 401)")
+            elif response.status_code == 403:
+                self.log_test("Protected Endpoint - Borrow Game", True, 
+                            "PUT /api/games/{id}/borrow properly requires authentication (HTTP 403)")
+            else:
+                self.log_test("Protected Endpoint - Borrow Game", False, 
+                            f"Expected 401/403, got HTTP {response.status_code}", response.text)
+        except Exception as e:
+            self.log_test("Protected Endpoint - Borrow Game", False, f"Exception: {str(e)}")
+
+    def test_non_protected_endpoints(self):
+        """Test that BGG endpoints still work without authentication"""
+        print("\n🌐 Testing Non-Protected BGG Endpoints...")
+        
+        # Test 1: BGG search should still work without auth
+        try:
+            response = self.session.get(f"{API_BASE}/games/search/Pandemic")
+            
+            if response.status_code == 200:
+                games = response.json()
+                if isinstance(games, list):
+                    self.log_test("Non-Protected - BGG Search", True, 
+                                f"BGG search works without auth, found {len(games)} games")
+                else:
+                    self.log_test("Non-Protected - BGG Search", False, 
+                                "Invalid response format", games)
+            else:
+                self.log_test("Non-Protected - BGG Search", False, 
+                            f"HTTP {response.status_code}", response.text)
+        except Exception as e:
+            self.log_test("Non-Protected - BGG Search", False, f"Exception: {str(e)}")
+
+        # Test 2: BGG game details should still work without auth
+        try:
+            response = self.session.get(f"{API_BASE}/games/details/30549")
+            
+            if response.status_code == 200:
+                game = response.json()
+                if 'title' in game and 'bgg_id' in game:
+                    self.log_test("Non-Protected - BGG Details", True, 
+                                f"BGG details work without auth for '{game.get('title')}'")
+                else:
+                    self.log_test("Non-Protected - BGG Details", False, 
+                                "Invalid response format", game)
+            else:
+                self.log_test("Non-Protected - BGG Details", False, 
+                            f"HTTP {response.status_code}", response.text)
+        except Exception as e:
+            self.log_test("Non-Protected - BGG Details", False, f"Exception: {str(e)}")
+
+    def test_backend_stability(self):
+        """Test that backend is running stable without import errors"""
+        print("\n⚡ Testing Backend Stability...")
+        
+        # Test 1: Root endpoint should work
+        try:
+            response = self.session.get(f"{BACKEND_URL}/")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if 'message' in data and 'version' in data:
+                    self.log_test("Backend Stability - Root", True, 
+                                f"Backend running: {data.get('message')} v{data.get('version')}")
+                else:
+                    self.log_test("Backend Stability - Root", False, 
+                                "Invalid root response", data)
+            else:
+                self.log_test("Backend Stability - Root", False, 
+                            f"HTTP {response.status_code}", response.text)
+        except Exception as e:
+            self.log_test("Backend Stability - Root", False, f"Exception: {str(e)}")
+
+        # Test 2: Health check should work
+        try:
+            response = self.session.get(f"{API_BASE}/health")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if 'status' in data and data['status'] == 'healthy':
+                    self.log_test("Backend Stability - Health", True, 
+                                f"Health check passed, cache size: {data.get('cache_size', 0)}")
+                else:
+                    self.log_test("Backend Stability - Health", False, 
+                                "Invalid health response", data)
+            else:
+                self.log_test("Backend Stability - Health", False, 
+                            f"HTTP {response.status_code}", response.text)
+        except Exception as e:
+            self.log_test("Backend Stability - Health", False, f"Exception: {str(e)}")
+
+    def run_authentication_tests(self):
+        """Run authentication-focused tests"""
+        print("🔐 Starting Google Authentication System Tests")
+        print("=" * 60)
+        
+        # 1. Backend Stability Check
+        self.test_backend_stability()
+        
+        # 2. Authentication Endpoints
+        self.test_authentication_endpoints()
+        
+        # 3. Protected Endpoints
+        self.test_protected_game_endpoints()
+        
+        # 4. Non-Protected Endpoints (BGG should still work)
+        self.test_non_protected_endpoints()
+        
+        # 5. Summary
+        print("\n📊 Authentication Test Summary")
+        print("=" * 60)
+        
+        passed = sum(1 for result in self.test_results if result['success'])
+        total = len(self.test_results)
+        
+        print(f"Tests Passed: {passed}/{total}")
+        print(f"Success Rate: {(passed/total)*100:.1f}%")
+        
+        if passed < total:
+            print("\n❌ Failed Tests:")
+            for result in self.test_results:
+                if not result['success']:
+                    print(f"   - {result['test']}: {result['details']}")
+        else:
+            print("\n✅ All authentication tests passed!")
+        
+        return passed == total
+
     def cleanup_test_games(self):
         """Clean up games added during testing"""
         print("\n🧹 Cleaning up test games...")
