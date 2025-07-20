@@ -437,7 +437,9 @@ function AppContent() {
   // Add game to collection
   const addGameToCollection = async (gameData) => {
     try {
-      await axios.post(`${API_BASE_URL}/api/games`, gameData);
+      console.log('Adding game to collection:', gameData);
+      const response = await axios.post(`${API_BASE_URL}/api/games`, gameData);
+      console.log('Game added successfully:', response.data);
       await fetchGames();
       setShowAddModal(false);
       setSelectedGame(null);
@@ -447,8 +449,12 @@ function AppContent() {
       console.error('Error adding game:', error);
       if (error.response?.status === 409) {
         alert(t('gameAlreadyExists'));
+      } else if (error.response?.status === 401 || error.response?.status === 403) {
+        alert('Bejelentkezési hiba. Kérem jelentkezzen be újra.');
+        logout();
       } else {
-        alert(t('failedToAdd'));
+        const errorMsg = error.response?.data?.detail || error.message || 'Ismeretlen hiba';
+        alert(`${t('failedToAdd')}: ${errorMsg}`);
       }
     }
   };
