@@ -50,11 +50,15 @@ class GameDetails(BaseModel):
     max_players: int = 1
     play_time: int = 0
     complexity_rating: float = 0.0
+    bgg_rating: float = 0.0  # BGG átlagos értékelés
+    min_age: int = 0  # Minimális életkor
     rules_link: str = ""
     release_year: int = 0
     categories: List[str] = []
-    description: str = ""
-    description_hu: Optional[str] = None  # Magyar leírás
+    description: str = ""  # Hosszú leírás
+    description_short: str = ""  # Rövid leírás (1 mondatos)
+    description_hu: Optional[str] = None  # Magyar hosszú leírás
+    description_short_hu: Optional[str] = None  # Magyar rövid leírás
     personal_notes: Optional[str] = None  # Saját megjegyzések
     language: str = "en"  # Játék nyelve: hu, en, multilang
     status: str = "available"  # available, borrowed
