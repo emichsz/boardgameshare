@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, List
 
 # Configuration
-BACKEND_URL = "https://4a554923-d638-47cf-b445-367ec8759b1c.preview.emergentagent.com"
+BACKEND_URL = "https://1d8b91d1-b76b-4461-b588-34d245d61e86.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 class BoardGameAPITester:
