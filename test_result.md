@@ -227,6 +227,8 @@ agent_communication:
     - message: "Implemented complete board game collection app with BGG integration. Backend API tested manually and working. Frontend has search results display issue that needs fixing after backend validation."
     - agent: "testing"
     - message: "Completed comprehensive backend API testing. All core functionality working perfectly - BGG integration, CRUD operations, and lending system all pass tests. Minor error handling issues found but don't affect core functionality."
+    - agent: "main"
+    - message: "Added Google OAuth 2.0 authentication system to backend. Fixed missing itsdangerous dependency issue. Backend now includes User model, JWT handling, and authentication endpoints. All game endpoints now require authentication and link to owner_id. Ready for authentication testing."
 
 
 #====================================================================================================
