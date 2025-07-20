@@ -19,6 +19,7 @@ from pymongo import MongoClient
 from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
 from authlib.integrations.starlette_client import OAuth
+from google.cloud import translate_v2 as translate
 from starlette.middleware.sessions import SessionMiddleware
 
 # Configure logging
