@@ -686,6 +686,43 @@ class BoardGameAPITester:
         except Exception as e:
             self.log_test("Backend Stability - Health", False, f"Exception: {str(e)}")
 
+    def run_translation_tests(self):
+        """Run OpenAI translation-focused tests"""
+        print("🌍 Starting OpenAI Translation Feature Tests")
+        print("=" * 60)
+        
+        # 1. Backend Stability Check
+        self.test_backend_stability()
+        
+        # 2. Translation Feature Tests
+        self.test_openai_translation_feature()
+        
+        # 3. Translation Performance Test
+        self.test_translation_performance()
+        
+        # 4. Translation Error Handling
+        self.test_translation_error_handling()
+        
+        # 5. Summary
+        print("\n📊 Translation Test Summary")
+        print("=" * 60)
+        
+        passed = sum(1 for result in self.test_results if result['success'])
+        total = len(self.test_results)
+        
+        print(f"Tests Passed: {passed}/{total}")
+        print(f"Success Rate: {(passed/total)*100:.1f}%")
+        
+        if passed < total:
+            print("\n❌ Failed Tests:")
+            for result in self.test_results:
+                if not result['success']:
+                    print(f"   - {result['test']}: {result['details']}")
+        else:
+            print("\n✅ All translation tests passed!")
+        
+        return passed == total
+
     def run_authentication_tests(self):
         """Run authentication-focused tests"""
         print("🔐 Starting Google Authentication System Tests")
