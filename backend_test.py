@@ -846,10 +846,10 @@ class BoardGameAPITester:
 if __name__ == "__main__":
     tester = BoardGameAPITester()
     try:
-        # Run authentication-focused tests as requested
-        success = tester.run_authentication_tests()
+        # Run translation-focused tests as requested in the review
+        success = tester.run_translation_tests()
         exit_code = 0 if success else 1
-        print(f"\n🏁 Authentication testing completed with exit code: {exit_code}")
+        print(f"\n🏁 Translation testing completed with exit code: {exit_code}")
     except KeyboardInterrupt:
         print("\n⚠️  Testing interrupted by user")
         tester.cleanup_test_games()
