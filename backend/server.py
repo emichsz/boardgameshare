@@ -7,15 +7,19 @@ from typing import List, Optional
 from contextlib import asynccontextmanager
 
 import httpx
+import jwt
 from lxml import etree
 from cachetools import TTLCache
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, status, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 from pymongo import MongoClient
 from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
+from authlib.integrations.starlette_client import OAuth
+from starlette.middleware.sessions import SessionMiddleware
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
