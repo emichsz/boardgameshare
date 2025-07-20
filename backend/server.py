@@ -669,7 +669,7 @@ async def update_game(game_id: str, update_data: dict):
         raise HTTPException(status_code=500, detail="Failed to update game")
 
 @app.delete("/api/games/{game_id}")
-async def delete_game(game_id: str):
+async def delete_game(game_id: str, current_user: User = Depends(get_current_user)):
     """Remove a game from the collection"""
     try:
         logger.info(f"Deleting game with ID: {game_id}")
