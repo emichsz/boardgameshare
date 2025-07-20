@@ -233,6 +233,11 @@ const translations = {
     website: 'Website',
     close: 'Close',
     
+    // Authentication  
+    welcome: 'Welcome',
+    logout: 'Logout',
+    profile: 'Profile',
+    
     // Status
     statusAvailable: 'Available',
     statusBorrowed: 'Borrowed'
