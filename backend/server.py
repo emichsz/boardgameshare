@@ -19,7 +19,7 @@ from pymongo import MongoClient
 from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
 from authlib.integrations.starlette_client import OAuth
-from google.cloud import translate_v2 as translate
+from openai import OpenAI
 from starlette.middleware.sessions import SessionMiddleware
 
 # Configure logging
@@ -32,12 +32,16 @@ DB_NAME = os.getenv("DB_NAME", "boardgame_collection")
 BGG_API_URL = "https://boardgamegeek.com/xmlapi2"
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "482036913993-nh78j7pqkeffjvpa3gh4qhtoh1u9708b.apps.googleusercontent.com")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "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")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Cache for BGG API responses (24 hour TTL)
 game_cache = TTLCache(maxsize=1000, ttl=86400)
 
 # OAuth setup
 oauth = OAuth()
+
+# OpenAI client
+openai_client = OpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
 
 # Security
 security = HTTPBearer()
@@ -147,19 +151,28 @@ oauth.register(
 
 # Helper functions
 async def translate_to_hungarian(text: str) -> str:
-    """Translate English text to Hungarian using Google Translate API"""
+    """Translate English text to Hungarian using OpenAI API"""
     if not text or len(text.strip()) == 0:
         return ""
     
     try:
-        # Try to use environment variable for credentials, fall back to simple service
-        translate_client = translate.Client()
-        result = translate_client.translate(text, target_language="hu", source_language="en")
-        translated_text = result["translatedText"]
+        if not openai_client:
+            logger.warning("OpenAI client not configured, returning original text")
+            return text
+            
+        response = openai_client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a professional translator. Translate the given English text to Hungarian. Only return the translated text, nothing else."},
+                {"role": "user", "content": text}
+            ],
+            max_tokens=1000,
+            temperature=0.3
+        )
         
-        # HTML entities are already handled in the frontend, but just in case
-        import html
-        return html.unescape(translated_text)
+        translated_text = response.choices[0].message.content.strip()
+        return translated_text
+        
     except Exception as e:
         logger.error(f"Translation error: {e}")
         # Return original text if translation fails
