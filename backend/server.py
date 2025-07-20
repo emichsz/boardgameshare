@@ -609,7 +609,7 @@ async def return_game(game_id: str):
         raise HTTPException(status_code=500, detail="Failed to update game status")
 
 @app.put("/api/games/{game_id}")
-async def update_game(game_id: str, update_data: dict):
+async def update_game(game_id: str, update_data: dict, current_user: User = Depends(get_current_user)):
     """Update a game in the collection"""
     try:
         logger.info(f"Updating game {game_id} with data: {update_data}")
