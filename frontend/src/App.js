@@ -771,26 +771,17 @@ function AppContent() {
   };
 
   const GameListItem = ({ game }) => {
-    const getLanguageLabel = (lang) => {
+    const getLanguageFlag = (lang) => {
       switch (lang) {
-        case 'hu': return t('hungarian');
-        case 'en': return t('english');
-        case 'multilang': return t('multilingual');
-        default: return t('english');
-      }
-    };
-
-    const getLanguageColor = (lang) => {
-      switch (lang) {
-        case 'hu': return 'bg-red-100 text-red-800';
-        case 'en': return 'bg-blue-100 text-blue-800';
-        case 'multilang': return 'bg-green-100 text-green-800';
-        default: return 'bg-gray-100 text-gray-800';
+        case 'hu': return '🇭🇺';
+        case 'en': return '🇬🇧';
+        case 'multilang': return '🌍';
+        default: return '🇬🇧';
       }
     };
 
     const displayTitle = language === 'hu' && game.title_hu ? game.title_hu : game.title;
-    const displayDescription = language === 'hu' && game.description_hu ? game.description_hu : game.description;
+    const displayShortDesc = language === 'hu' && game.description_short_hu ? game.description_short_hu : game.description_short;
 
     return (
       <div 
@@ -809,10 +800,10 @@ function AppContent() {
               }}
             />
             
-            {/* Overlay az értékeléssel */}
-            {game.complexity_rating > 0 && (
+            {/* Overlay BGG értékeléssel */}
+            {game.bgg_rating > 0 && (
               <div className="absolute top-1 left-1 bg-yellow-500 text-black px-1 py-0.5 rounded text-xs font-bold">
-                ⭐ {game.complexity_rating.toFixed(1)}
+                ⭐ {game.bgg_rating.toFixed(1)}
               </div>
             )}
           </div>
@@ -820,16 +811,12 @@ function AppContent() {
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between mb-2">
               <h3 className="font-bold text-lg text-gray-900 truncate pr-4">{displayTitle}</h3>
-              <div className="flex gap-2 flex-shrink-0">
-                <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  game.status === 'available' 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-orange-100 text-orange-800'
-                }`}>
-                  {game.status === 'available' ? t('statusAvailable') : t('statusBorrowed')}
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="text-xl">
+                  {game.status === 'available' ? '✅' : '❌'}
                 </div>
-                <div className={`px-2 py-1 rounded-full text-xs font-medium ${getLanguageColor(game.language)}`}>
-                  {getLanguageLabel(game.language)}
+                <div className="text-lg">
+                  {getLanguageFlag(game.language)}
                 </div>
               </div>
             </div>
@@ -838,12 +825,13 @@ function AppContent() {
             <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-2">
               <div>👥 {game.min_players}-{game.max_players}</div>
               <div>⏱️ {game.play_time} {t('min')}</div>
+              {game.min_age > 0 && <div>🔞 {game.min_age}+</div>}
             </div>
 
-            {/* Leírás */}
-            {displayDescription && (
+            {/* Rövid leírás */}
+            {displayShortDesc && (
               <p className="text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
-                {displayDescription.length > 100 ? displayDescription.substring(0, 100) + '...' : displayDescription}
+                {displayShortDesc}
               </p>
             )}
 
