@@ -212,6 +212,80 @@ async def fetch_bgg_data(endpoint: str, retries: int = 3) -> bytes:
 async def root():
     return {"message": "Board Game Collection API", "version": "1.0.0"}
 
+# Authentication endpoints
+@app.post("/api/auth/google")
+async def google_auth(auth_request: GoogleAuthRequest):
+    """Authenticate user with Google OAuth"""
+    try:
+        # Verify the Google JWT token
+        import requests
+        response = requests.get(f"https://oauth2.googleapis.com/tokeninfo?id_token={auth_request.credential}")
+        
+        if response.status_code != 200:
+            raise HTTPException(status_code=401, detail="Invalid Google token")
+        
+        user_info = response.json()
+        
+        # Check if user exists
+        user = await db.users.find_one({"google_id": user_info["sub"]})
+        
+        if not user:
+            # Create new user
+            new_user = User(
+                google_id=user_info["sub"],
+                email=user_info["email"],
+                name=user_info["name"],
+                picture=user_info.get("picture")
+            )
+            await db.users.insert_one(new_user.dict())
+            user = new_user.dict()
+        else:
+            # Update existing user
+            await db.users.update_one(
+                {"google_id": user_info["sub"]},
+                {"$set": {
+                    "name": user_info["name"],
+                    "picture": user_info.get("picture")
+                }}
+            )
+            user["id"] = str(user.get("_id", user.get("id", "")))
+        
+        # Create access token
+        token = create_access_token(user["id"], user["email"])
+        
+        return {
+            "access_token": token,
+            "user": {
+                "id": user["id"],
+                "email": user["email"],
+                "name": user["name"],
+                "picture": user.get("picture"),
+                "address": user.get("address")
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Google auth error: {e}")
+        raise HTTPException(status_code=401, detail="Authentication failed")
+
+@app.get("/api/auth/me")
+async def get_current_user_info(current_user: User = Depends(get_current_user)):
+    """Get current user information"""
+    return current_user
+
+@app.put("/api/auth/profile")
+async def update_profile(name: str, address: str, current_user: User = Depends(get_current_user)):
+    """Update user profile"""
+    try:
+        await db.users.update_one(
+            {"id": current_user.id},
+            {"$set": {"name": name, "address": address}}
+        )
+        return {"message": "Profile updated successfully"}
+    except Exception as e:
+        logger.error(f"Profile update error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to update profile")
+
 @app.get("/api/games/search/{query}", response_model=List[GameSearch])
 async def search_games(query: str):
     """Search for games on BoardGameGeek"""
