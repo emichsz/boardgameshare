@@ -265,6 +265,7 @@ function useTranslation() {
 
 function AppContent() {
   const { t, language, toggleLanguage } = useTranslation();
+  const { user, logout, isAuthenticated, loading } = useAuth();
   const [games, setGames] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
   const [query, setQuery] = useState('');
@@ -291,6 +292,24 @@ function AppContent() {
     category: '',
     designer: ''
   });
+
+  // Show loading screen while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-blue-100">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🎲</div>
+          <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Betöltés...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login screen if not authenticated
+  if (!isAuthenticated) {
+    return <LoginScreen />;
+  }
 
   // Fetch user's game collection
   const fetchGames = async () => {
