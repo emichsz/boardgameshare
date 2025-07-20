@@ -131,6 +131,37 @@ app.add_middleware(
 )
 
 # Helper functions
+def create_access_token(user_id: str, email: str):
+    """Create JWT access token"""
+    payload = {
+        "user_id": user_id,
+        "email": email,
+        "exp": datetime.utcnow() + timedelta(days=7)
+    }
+    return jwt.encode(payload, "your-secret-key", algorithm="HS256")
+
+def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Verify JWT token"""
+    try:
+        payload = jwt.decode(credentials.credentials, "your-secret-key", algorithms=["HS256"])
+        user_id = payload.get("user_id")
+        if user_id is None:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        return user_id
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+async def get_current_user(user_id: str = Depends(verify_token)):
+    """Get current user from database"""
+    user = await db.users.find_one({"id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user["id"] = str(user.get("_id", user.get("id", "")))
+    if "_id" in user:
+        del user["_id"]
+    return User(**user)
 def clean_html(text: str) -> str:
     """Remove HTML tags from text"""
     if not text:
