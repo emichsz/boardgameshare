@@ -498,7 +498,7 @@ async def add_existing_game_to_my_collection(game_id: str, current_user: User = 
         raise HTTPException(status_code=500, detail="Failed to add game to your collection")
 
 @app.put("/api/games/{game_id}/borrow", response_model=GameDetails)
-async def borrow_game(game_id: str, borrow_request: BorrowRequest):
+async def borrow_game(game_id: str, borrow_request: BorrowRequest, current_user: User = Depends(get_current_user)):
     """Mark a game as borrowed"""
     try:
         return_date = datetime.strptime(borrow_request.return_date, "%Y-%m-%d")
