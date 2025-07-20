@@ -323,6 +323,14 @@ function AppContent() {
     designer: ''
   });
 
+  // HTML entitások dekódolása
+  const decodeHtmlEntities = (str) => {
+    if (!str) return str;
+    const textArea = document.createElement('textarea');
+    textArea.innerHTML = str;
+    return textArea.value;
+  };
+
   // Fetch user's game collection
   const fetchGames = async () => {
     try {
