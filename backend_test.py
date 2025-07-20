@@ -423,6 +423,39 @@ class BoardGameAPITester:
         except Exception as e:
             self.log_test("Protected Endpoint - Borrow Game", False, f"Exception: {str(e)}")
 
+        # Test 5: PUT /api/games/{id}/return should require authentication
+        try:
+            response = self.session.put(f"{API_BASE}/games/test-id/return")
+            
+            if response.status_code == 401:
+                self.log_test("Protected Endpoint - Return Game", True, 
+                            "PUT /api/games/{id}/return properly requires authentication (HTTP 401)")
+            elif response.status_code == 403:
+                self.log_test("Protected Endpoint - Return Game", True, 
+                            "PUT /api/games/{id}/return properly requires authentication (HTTP 403)")
+            else:
+                self.log_test("Protected Endpoint - Return Game", False, 
+                            f"Expected 401/403, got HTTP {response.status_code}", response.text)
+        except Exception as e:
+            self.log_test("Protected Endpoint - Return Game", False, f"Exception: {str(e)}")
+
+        # Test 6: PUT /api/games/{id} should require authentication
+        try:
+            update_data = {"title": "Updated Game"}
+            response = self.session.put(f"{API_BASE}/games/test-id", json=update_data)
+            
+            if response.status_code == 401:
+                self.log_test("Protected Endpoint - Update Game", True, 
+                            "PUT /api/games/{id} properly requires authentication (HTTP 401)")
+            elif response.status_code == 403:
+                self.log_test("Protected Endpoint - Update Game", True, 
+                            "PUT /api/games/{id} properly requires authentication (HTTP 403)")
+            else:
+                self.log_test("Protected Endpoint - Update Game", False, 
+                            f"Expected 401/403, got HTTP {response.status_code}", response.text)
+        except Exception as e:
+            self.log_test("Protected Endpoint - Update Game", False, f"Exception: {str(e)}")
+
     def test_non_protected_endpoints(self):
         """Test that BGG endpoints still work without authentication"""
         print("\n🌐 Testing Non-Protected BGG Endpoints...")
