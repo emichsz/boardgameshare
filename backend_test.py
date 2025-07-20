@@ -496,6 +496,156 @@ class BoardGameAPITester:
         except Exception as e:
             self.log_test("Non-Protected - BGG Details", False, f"Exception: {str(e)}")
 
+    def test_openai_translation_feature(self):
+        """Test OpenAI automatic translation feature for Hungarian"""
+        print("\n🌍 Testing OpenAI Translation Feature...")
+        
+        # Test popular games with different BGG IDs
+        test_games = [
+            {"bgg_id": "174430", "name": "Gloomhaven"},
+            {"bgg_id": "227072", "name": "Kaméleon"},
+            {"bgg_id": "30549", "name": "Pandemic"}
+        ]
+        
+        for test_game in test_games:
+            try:
+                print(f"\n   Testing translation for {test_game['name']} (BGG ID: {test_game['bgg_id']})...")
+                response = self.session.get(f"{API_BASE}/games/details/{test_game['bgg_id']}")
+                
+                if response.status_code == 200:
+                    game = response.json()
+                    
+                    # Check if Hungarian translation fields are present
+                    translation_fields = ['title_hu', 'description_hu', 'description_short_hu']
+                    missing_fields = []
+                    empty_fields = []
+                    
+                    for field in translation_fields:
+                        if field not in game:
+                            missing_fields.append(field)
+                        elif not game[field] or game[field].strip() == "":
+                            empty_fields.append(field)
+                    
+                    if missing_fields:
+                        self.log_test(f"Translation - {test_game['name']} Structure", False, 
+                                    f"Missing translation fields: {missing_fields}", game)
+                    elif empty_fields:
+                        self.log_test(f"Translation - {test_game['name']} Content", False, 
+                                    f"Empty translation fields: {empty_fields}. OpenAI may not be configured or failed.", 
+                                    {field: game.get(field, 'MISSING') for field in translation_fields})
+                    else:
+                        # Check translation quality - basic validation
+                        original_title = game.get('title', '')
+                        hungarian_title = game.get('title_hu', '')
+                        
+                        # Basic quality check: Hungarian translation should be different from English
+                        # and should not contain obvious English words (basic check)
+                        quality_issues = []
+                        
+                        if hungarian_title == original_title:
+                            quality_issues.append("Hungarian title identical to English")
+                        
+                        if len(hungarian_title) < 2:
+                            quality_issues.append("Hungarian title too short")
+                        
+                        # Check if description translations exist and are reasonable
+                        if game.get('description_hu') and len(game.get('description_hu', '')) < 10:
+                            quality_issues.append("Hungarian description too short")
+                        
+                        if quality_issues:
+                            self.log_test(f"Translation - {test_game['name']} Quality", False, 
+                                        f"Quality issues: {quality_issues}", 
+                                        {
+                                            'title': original_title,
+                                            'title_hu': hungarian_title,
+                                            'description_hu_length': len(game.get('description_hu', '')),
+                                            'description_short_hu_length': len(game.get('description_short_hu', ''))
+                                        })
+                        else:
+                            self.log_test(f"Translation - {test_game['name']} Success", True, 
+                                        f"Hungarian translations present and reasonable. Title: '{original_title}' -> '{hungarian_title}'",
+                                        {
+                                            'title_hu': hungarian_title,
+                                            'description_hu_preview': game.get('description_hu', '')[:100] + '...' if len(game.get('description_hu', '')) > 100 else game.get('description_hu', ''),
+                                            'description_short_hu': game.get('description_short_hu', '')
+                                        })
+                else:
+                    self.log_test(f"Translation - {test_game['name']} API", False, 
+                                f"Failed to fetch game details: HTTP {response.status_code}", response.text)
+                    
+            except Exception as e:
+                self.log_test(f"Translation - {test_game['name']} Exception", False, f"Exception: {str(e)}")
+
+    def test_translation_performance(self):
+        """Test translation performance and response time"""
+        print("\n⚡ Testing Translation Performance...")
+        
+        try:
+            start_time = time.time()
+            response = self.session.get(f"{API_BASE}/games/details/174430")  # Gloomhaven
+            end_time = time.time()
+            
+            response_time = end_time - start_time
+            
+            if response.status_code == 200:
+                game = response.json()
+                
+                # Check if translations are present
+                has_translations = all(field in game and game[field] for field in ['title_hu', 'description_hu', 'description_short_hu'])
+                
+                if has_translations:
+                    if response_time < 30:  # Reasonable time limit for translation
+                        self.log_test("Translation Performance", True, 
+                                    f"Response with translations completed in {response_time:.2f}s (acceptable)")
+                    else:
+                        self.log_test("Translation Performance", False, 
+                                    f"Response took {response_time:.2f}s (too slow for production)")
+                else:
+                    self.log_test("Translation Performance", False, 
+                                f"No translations found in response (response time: {response_time:.2f}s)")
+            else:
+                self.log_test("Translation Performance", False, 
+                            f"HTTP {response.status_code} (response time: {response_time:.2f}s)", response.text)
+                
+        except Exception as e:
+            self.log_test("Translation Performance", False, f"Exception: {str(e)}")
+
+    def test_translation_error_handling(self):
+        """Test translation error handling"""
+        print("\n🛡️ Testing Translation Error Handling...")
+        
+        try:
+            # Test with a game that should exist but might have translation issues
+            response = self.session.get(f"{API_BASE}/games/details/30549")  # Pandemic
+            
+            if response.status_code == 200:
+                game = response.json()
+                
+                # Even if translation fails, the endpoint should still return the game data
+                required_base_fields = ['bgg_id', 'title', 'authors', 'description']
+                missing_base_fields = [field for field in required_base_fields if field not in game or not game[field]]
+                
+                if missing_base_fields:
+                    self.log_test("Translation Error Handling", False, 
+                                f"Missing base game fields: {missing_base_fields}", game)
+                else:
+                    # Check if translation fields exist (even if empty due to translation failure)
+                    translation_fields = ['title_hu', 'description_hu', 'description_short_hu']
+                    translation_fields_present = all(field in game for field in translation_fields)
+                    
+                    if translation_fields_present:
+                        self.log_test("Translation Error Handling", True, 
+                                    "Game data returned successfully with translation fields (even if translation failed)")
+                    else:
+                        self.log_test("Translation Error Handling", False, 
+                                    f"Translation fields missing from response structure")
+            else:
+                self.log_test("Translation Error Handling", False, 
+                            f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("Translation Error Handling", False, f"Exception: {str(e)}")
+
     def test_backend_stability(self):
         """Test that backend is running stable without import errors"""
         print("\n⚡ Testing Backend Stability...")
