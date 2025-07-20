@@ -88,8 +88,8 @@ class GameDetails(BaseModel):
     borrowed_by: Optional[str] = None
     borrowed_date: Optional[datetime] = None
     return_date: Optional[datetime] = None
-    owner_id: str  # Ki birtokolja ezt a játékot
-    owner_name: str  # Birtokos neve
+    owner_id: Optional[str] = None  # Ki birtokolja ezt a játékot
+    owner_name: Optional[str] = None  # Birtokos neve
 
 class User(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
