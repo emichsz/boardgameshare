@@ -206,6 +206,26 @@ async def get_game_details(bgg_id: str):
         for category in item.xpath(".//link[@type='boardgamecategory']"):
             categories.append(category.get("value", ""))
         
+        # Get BGG rating and other statistics
+        rating_elem = item.find(".//statistics/ratings/average")
+        bgg_rating = float(rating_elem.get("value", 0)) if rating_elem is not None else 0.0
+        
+        # Get minimum age
+        minage_elem = item.find(".//minage")
+        min_age = int(minage_elem.get("value", 0)) if minage_elem is not None else 0
+        
+        # Process description for short version (first sentence)
+        full_description = clean_html(desc_elem.text if desc_elem is not None else "")
+        short_description = ""
+        if full_description:
+            # Extract first sentence (up to first period, exclamation or question mark)
+            import re
+            sentences = re.split(r'[.!?]+', full_description)
+            if sentences:
+                short_description = sentences[0].strip() + "."
+                if len(short_description) > 200:  # Limit to 200 chars
+                    short_description = short_description[:200] + "..."
+        
         game_details = GameDetails(
             bgg_id=bgg_id,
             title=name_elem.get("value") if name_elem is not None else "Unknown Game",
