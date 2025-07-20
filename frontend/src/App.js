@@ -342,6 +342,17 @@ function AppContent() {
       const response = await axios.get(`${API_BASE_URL}/api/games?${params.toString()}`);
       let filteredGames = response.data;
       
+      // HTML entitások dekódolása a lista elemekben is
+      filteredGames = filteredGames.map(game => ({
+        ...game,
+        title: decodeHtmlEntities(game.title),
+        description: decodeHtmlEntities(game.description),
+        description_short: decodeHtmlEntities(game.description_short),
+        title_hu: decodeHtmlEntities(game.title_hu),
+        description_hu: decodeHtmlEntities(game.description_hu),
+        description_short_hu: decodeHtmlEntities(game.description_short_hu)
+      }));
+      
       // Kliens oldali fejlett szűrés
       if (showAdvancedFilters) {
         filteredGames = filteredGames.filter(game => {
@@ -378,6 +389,10 @@ function AppContent() {
       setGames(filteredGames);
     } catch (error) {
       console.error('Error fetching games:', error);
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        console.log('Authentication expired, logging out...');
+        logout();
+      }
     }
   };
 
