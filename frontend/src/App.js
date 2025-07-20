@@ -632,26 +632,17 @@ function AppContent() {
   );
 
   const GameCard = ({ game }) => {
-    const getLanguageLabel = (lang) => {
+    const getLanguageFlag = (lang) => {
       switch (lang) {
-        case 'hu': return t('hungarian');
-        case 'en': return t('english');
-        case 'multilang': return t('multilingual');
-        default: return t('english');
-      }
-    };
-
-    const getLanguageColor = (lang) => {
-      switch (lang) {
-        case 'hu': return 'bg-red-100 text-red-800';
-        case 'en': return 'bg-blue-100 text-blue-800';
-        case 'multilang': return 'bg-green-100 text-green-800';
-        default: return 'bg-gray-100 text-gray-800';
+        case 'hu': return '🇭🇺';
+        case 'en': return '🇬🇧';
+        case 'multilang': return '🌍';
+        default: return '🇬🇧';
       }
     };
 
     const displayTitle = language === 'hu' && game.title_hu ? game.title_hu : game.title;
-    const displayDescription = language === 'hu' && game.description_hu ? game.description_hu : game.description;
+    const displayShortDesc = language === 'hu' && game.description_short_hu ? game.description_short_hu : game.description_short;
 
     return (
       <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
@@ -673,9 +664,9 @@ function AppContent() {
             {/* Overlay információk a képen */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent">
               {/* BGG értékelés bal felső */}
-              {game.complexity_rating > 0 && (
+              {game.bgg_rating > 0 && (
                 <div className="absolute top-2 left-2 bg-yellow-500 text-black px-2 py-1 rounded-full text-xs font-bold">
-                  ⭐ {game.complexity_rating.toFixed(1)}
+                  ⭐ {game.bgg_rating.toFixed(1)}
                 </div>
               )}
               
@@ -684,22 +675,24 @@ function AppContent() {
                 <div className="bg-black/70 text-white px-2 py-1 rounded-full text-xs font-medium mb-1">
                   👥 {game.min_players}-{game.max_players}
                 </div>
-                <div className="bg-black/70 text-white px-2 py-1 rounded-full text-xs font-medium">
+                <div className="bg-black/70 text-white px-2 py-1 rounded-full text-xs font-medium mb-1">
                   ⏱️ {game.play_time}{t('min')}
                 </div>
+                {/* Korhatár */}
+                {game.min_age > 0 && (
+                  <div className="bg-black/70 text-white px-2 py-1 rounded-full text-xs font-medium">
+                    🔞 {game.min_age}+
+                  </div>
+                )}
               </div>
 
-              {/* Állapot és nyelvi jelzők bal alsó */}
+              {/* Állapot és nyelvi zászló bal alsó */}
               <div className="absolute bottom-2 left-2 flex flex-col gap-1">
-                <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  game.status === 'available' 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-orange-100 text-orange-800'
-                }`}>
-                  {game.status === 'available' ? t('statusAvailable') : t('statusBorrowed')}
+                <div className="text-xl">
+                  {game.status === 'available' ? '✅' : '❌'}
                 </div>
-                <div className={`px-2 py-1 rounded-full text-xs font-medium ${getLanguageColor(game.language)}`}>
-                  {getLanguageLabel(game.language)}
+                <div className="text-xl">
+                  {getLanguageFlag(game.language)}
                 </div>
               </div>
             </div>
@@ -713,10 +706,10 @@ function AppContent() {
             {displayTitle}
           </h3>
           
-          {/* Játék leírása */}
-          {displayDescription && (
-            <p className="text-sm text-gray-600 mb-4 line-clamp-3 leading-relaxed">
-              {displayDescription.length > 150 ? displayDescription.substring(0, 150) + '...' : displayDescription}
+          {/* Rövid leírás */}
+          {displayShortDesc && (
+            <p className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">
+              {displayShortDesc}
             </p>
           )}
 
