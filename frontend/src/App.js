@@ -407,6 +407,11 @@ function AppContent() {
       const response = await axios.get(`${API_BASE_URL}/api/games/details/${bggId}`);
       const gameData = response.data;
       
+      // HTML entitások dekódolása
+      gameData.title = decodeHtmlEntities(gameData.title);
+      gameData.description = decodeHtmlEntities(gameData.description);
+      gameData.description_short = decodeHtmlEntities(gameData.description_short);
+      
       // Alapértelmezett nyelvi beállítások a felhasználó nyelvének megfelelően
       if (!gameData.title_hu) gameData.title_hu = '';
       if (!gameData.description_hu) gameData.description_hu = '';
@@ -424,6 +429,7 @@ function AppContent() {
       setSelectedGame(gameData);
     } catch (error) {
       console.error('Error fetching game details:', error);
+      alert('Hiba a játék részleteinek betöltésekor: ' + (error.response?.data?.detail || error.message));
     }
     setIsLoadingDetails(false);
   };
