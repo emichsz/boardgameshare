@@ -115,6 +115,11 @@ const translations = {
     rulesLink: 'Játékszabályok',
     website: 'Weboldal',
     close: 'Bezárás',
+    
+    // Authentikáció
+    welcome: 'Üdvözöljük',
+    logout: 'Kijelentkezés',
+    profile: 'Profil',
   },
   en: {
     // Header
