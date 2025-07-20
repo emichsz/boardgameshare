@@ -322,9 +322,6 @@ function AppContent() {
     category: '',
     designer: ''
   });
-  if (!isAuthenticated) {
-    return <LoginScreen />;
-  }
 
   // Fetch user's game collection
   const fetchGames = async () => {
