@@ -146,6 +146,25 @@ oauth.register(
 )
 
 # Helper functions
+async def translate_to_hungarian(text: str) -> str:
+    """Translate English text to Hungarian using Google Translate API"""
+    if not text or len(text.strip()) == 0:
+        return ""
+    
+    try:
+        # Try to use environment variable for credentials, fall back to simple service
+        translate_client = translate.Client()
+        result = translate_client.translate(text, target_language="hu", source_language="en")
+        translated_text = result["translatedText"]
+        
+        # HTML entities are already handled in the frontend, but just in case
+        import html
+        return html.unescape(translated_text)
+    except Exception as e:
+        logger.error(f"Translation error: {e}")
+        # Return original text if translation fails
+        return text
+
 def create_access_token(user_id: str, email: str):
     """Create JWT access token"""
     payload = {
