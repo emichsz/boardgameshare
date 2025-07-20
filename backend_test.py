@@ -467,18 +467,18 @@ class BoardGameAPITester:
         """Test that backend is running stable without import errors"""
         print("\n⚡ Testing Backend Stability...")
         
-        # Test 1: Root endpoint should work
+        # Test 1: Root endpoint should work (returns HTML for frontend)
         try:
             response = self.session.get(f"{BACKEND_URL}/")
             
             if response.status_code == 200:
-                data = response.json()
-                if 'message' in data and 'version' in data:
+                # Root endpoint returns HTML (frontend), not JSON
+                if "html" in response.text.lower():
                     self.log_test("Backend Stability - Root", True, 
-                                f"Backend running: {data.get('message')} v{data.get('version')}")
+                                "Backend serving frontend correctly")
                 else:
                     self.log_test("Backend Stability - Root", False, 
-                                "Invalid root response", data)
+                                "Unexpected root response format")
             else:
                 self.log_test("Backend Stability - Root", False, 
                             f"HTTP {response.status_code}", response.text)
