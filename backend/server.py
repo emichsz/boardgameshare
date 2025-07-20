@@ -235,10 +235,13 @@ async def get_game_details(bgg_id: str):
             max_players=int(maxplayers_elem.get("value", 1)) if maxplayers_elem is not None else 1,
             play_time=int(playtime_elem.get("value", 0)) if playtime_elem is not None else 0,
             complexity_rating=float(weight_elem.get("value", 0)) if weight_elem is not None else 0.0,
+            bgg_rating=bgg_rating,
+            min_age=min_age,
             rules_link=f"https://boardgamegeek.com/boardgame/{bgg_id}/rules",
             release_year=int(year_elem.get("value", 0)) if year_elem is not None else 0,
             categories=categories[:5],  # Limit to 5 categories
-            description=clean_html(desc_elem.text if desc_elem is not None else ""),
+            description=full_description,
+            description_short=short_description,
         )
         
         # Cache the result
