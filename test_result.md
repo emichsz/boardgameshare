@@ -231,7 +231,7 @@ metadata:
 
 test_plan:
   current_focus:
-    []
+    - "Google Authentication UI"
   stuck_tasks:
     - "Game Search UI"
   test_all: false
