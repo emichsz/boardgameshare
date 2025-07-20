@@ -121,6 +121,9 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# Add session middleware
+app.add_middleware(SessionMiddleware, secret_key="your-session-secret-key")
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
@@ -128,6 +131,17 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+
+# Configure OAuth
+oauth.register(
+    name='google',
+    client_id=GOOGLE_CLIENT_ID,
+    client_secret=GOOGLE_CLIENT_SECRET,
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_kwargs={
+        'scope': 'openid email profile'
+    }
 )
 
 # Helper functions
