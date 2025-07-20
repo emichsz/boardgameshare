@@ -273,12 +273,49 @@ async def get_current_user_info(current_user: User = Depends(get_current_user)):
     """Get current user information"""
     return current_user
 
+@app.get("/api/auth/profile")
+async def get_user_profile(current_user: User = Depends(get_current_user)):
+    """Get user profile with lending information"""
+    try:
+        # Get games I own that are borrowed by others
+        lent_games = []
+        async for game in db.games.find({"owner_id": current_user.id, "status": "borrowed"}):
+            game["id"] = str(game.get("_id", game.get("id", "")))
+            if "_id" in game:
+                del game["_id"]
+            lent_games.append(game)
+        
+        # Get games I borrowed from others
+        borrowed_games = []
+        async for game in db.games.find({"borrowed_by": current_user.name, "status": "borrowed"}):
+            game["id"] = str(game.get("_id", game.get("id", "")))
+            if "_id" in game:
+                del game["_id"]
+            borrowed_games.append(game)
+        
+        return {
+            "user": current_user,
+            "lent_games": lent_games,
+            "borrowed_games": borrowed_games
+        }
+        
+    except Exception as e:
+        logger.error(f"Error fetching user profile: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch user profile")
+
 @app.put("/api/auth/profile")
 async def update_profile(name: str, address: str, current_user: User = Depends(get_current_user)):
     """Update user profile"""
     try:
+        query_conditions = [{"id": current_user.id}]
+        try:
+            if len(current_user.id) == 24:
+                query_conditions.append({"_id": ObjectId(current_user.id)})
+        except:
+            pass
+        
         await db.users.update_one(
-            {"id": current_user.id},
+            {"$or": query_conditions},
             {"$set": {"name": name, "address": address}}
         )
         return {"message": "Profile updated successfully"}
