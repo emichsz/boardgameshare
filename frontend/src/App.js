@@ -1319,12 +1319,27 @@ function AppContent() {
               {t('title')}
             </h1>
             <div className="flex items-center gap-4">
+              {/* User welcome */}
+              {user && (
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <span>{t('welcome')}, {user.name || user.email}!</span>
+                  {user.picture && (
+                    <img
+                      src={user.picture}
+                      alt="User"
+                      className="w-8 h-8 rounded-full border-2 border-gray-200"
+                    />
+                  )}
+                </div>
+              )}
+              
               <button
                 onClick={toggleLanguage}
                 className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 {language === 'hu' ? 'EN' : 'HU'}
               </button>
+              
               <button
                 onClick={() => setShowAddModal(true)}
                 className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-2"
@@ -1333,6 +1348,13 @@ function AppContent() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
                 {t('addGame')}
+              </button>
+              
+              <button
+                onClick={logout}
+                className="px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 border border-red-300 rounded-lg hover:bg-red-50 transition-colors"
+              >
+                {t('logout')}
               </button>
             </div>
           </div>
