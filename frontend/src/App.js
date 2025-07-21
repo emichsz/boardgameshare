@@ -404,6 +404,29 @@ function AppContent() {
         });
       }
       
+      // Sorrendezés
+      filteredGames.sort((a, b) => {
+        let compareValue = 0;
+        
+        switch (sortBy) {
+          case 'rating':
+            compareValue = (b.bgg_rating || 0) - (a.bgg_rating || 0);
+            break;
+          case 'alphabetical':
+            const titleA = (language === 'hu' && a.title_hu) ? a.title_hu : a.title;
+            const titleB = (language === 'hu' && b.title_hu) ? b.title_hu : b.title;
+            compareValue = titleA.localeCompare(titleB, language === 'hu' ? 'hu' : 'en');
+            break;
+          case 'playtime':
+            compareValue = (b.play_time || 0) - (a.play_time || 0);
+            break;
+          default:
+            compareValue = 0;
+        }
+        
+        return sortOrder === 'asc' ? -compareValue : compareValue;
+      });
+      
       setGames(filteredGames);
     } catch (error) {
       console.error('Error fetching games:', error);
