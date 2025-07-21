@@ -221,6 +221,14 @@ const translations = {
     gridView: 'Grid View',
     listView: 'List View',
     
+    // Sorting
+    sortBy: 'Sort by',
+    sortByRating: 'By Rating',
+    sortByAlphabetical: 'Alphabetical',
+    sortByPlaytime: 'By Playtime',
+    sortOrderAsc: 'Ascending',
+    sortOrderDesc: 'Descending',
+    
     // Age rating
     minAge: 'Age Rating',
     ageYears: 'years+',
