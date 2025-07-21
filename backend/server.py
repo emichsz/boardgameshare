@@ -375,11 +375,18 @@ async def search_games(query: str):
         for item in root.xpath("//item"):
             name_elem = item.find("name")
             year_elem = item.find("yearpublished")
+            game_id = item.get("id")
+            
+            # Create BGG thumbnail URL
+            # Note: BGG doesn't provide thumbnails in search, but we can try to construct a likely URL
+            # This is a best-effort approach - some images might not exist
+            thumbnail_url = f"https://cf.geekdo-images.com/thumb/img/{game_id}"
             
             games.append(GameSearch(
-                id=item.get("id"),
+                id=game_id,
                 name=name_elem.get("value") if name_elem is not None else "Unknown",
-                year=year_elem.get("value") if year_elem is not None else None
+                year=year_elem.get("value") if year_elem is not None else None,
+                thumbnail=thumbnail_url
             ))
         
         return games[:10]  # Return top 10 matches
