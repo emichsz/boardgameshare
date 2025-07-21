@@ -1012,20 +1012,41 @@ function AppContent() {
     );
   };
 
-  const SearchResultCard = ({ game }) => (
-    <div 
-      className="flex items-center p-4 bg-white rounded-lg shadow hover:shadow-md cursor-pointer transition-shadow"
-      onClick={() => getGameDetails(game.id)}
-    >
-      <div className="flex-1">
-        <h3 className="font-semibold text-gray-900">{game.name}</h3>
-        {game.year && <p className="text-sm text-gray-500">{t('released')}: {game.year}</p>}
+  const SearchResultCard = ({ game }) => {
+    // Use a placeholder image URL for BoardGameGeek games
+    const placeholderImage = `https://cf.geekdo-images.com/itemrep/img/placeholder.png`;
+    const gameImageUrl = game.thumbnail || placeholderImage;
+    
+    return (
+      <div 
+        className="flex items-center p-4 bg-white rounded-lg shadow hover:shadow-md cursor-pointer transition-shadow"
+        onClick={() => getGameDetails(game.id)}
+      >
+        {/* Game Image */}
+        <div className="w-16 h-16 flex-shrink-0 mr-4">
+          <img
+            src={gameImageUrl}
+            alt={game.name}
+            className="w-full h-full object-cover rounded-lg border border-gray-200"
+            onError={(e) => {
+              e.target.src = '/api/placeholder/64/64';
+            }}
+          />
+        </div>
+        
+        {/* Game Info */}
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-gray-900 truncate">{game.name}</h3>
+          {game.year && <p className="text-sm text-gray-500">{t('released')}: {game.year}</p>}
+        </div>
+        
+        {/* Arrow Icon */}
+        <svg className="w-5 h-5 text-gray-400 flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
       </div>
-      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-      </svg>
-    </div>
-  );
+    );
+  };
 
   const BorrowModal = ({ show, game, onClose, onConfirm }) => {
     const [borrowerName, setBorrowerName] = useState('');
