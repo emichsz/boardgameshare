@@ -93,6 +93,255 @@ class BoardGameAPITester:
             self.log_test("BGG Search - Pandemic", False, f"Exception: {str(e)}")
             return None
 
+    def test_bgg_search_with_thumbnails(self):
+        """Test BoardGameGeek search functionality with thumbnail images"""
+        print("\n🖼️ Testing BGG Search with Thumbnails...")
+        
+        # Test popular games that should have thumbnails
+        test_queries = ["pandemic", "catan", "gloomhaven"]
+        
+        for query in test_queries:
+            try:
+                print(f"\n   Testing search for '{query}'...")
+                response = self.session.get(f"{API_BASE}/games/search/{query}")
+                
+                if response.status_code == 200:
+                    games = response.json()
+                    if isinstance(games, list) and len(games) > 0:
+                        # Check response structure
+                        first_game = games[0]
+                        required_fields = ['id', 'name', 'year', 'thumbnail']
+                        missing_fields = [field for field in required_fields if field not in first_game]
+                        
+                        if missing_fields:
+                            self.log_test(f"Search Thumbnails - {query.title()} Structure", False, 
+                                        f"Missing fields in response: {missing_fields}", first_game)
+                            continue
+                        
+                        # Check thumbnail URLs
+                        games_with_thumbnails = [game for game in games if game.get('thumbnail')]
+                        games_without_thumbnails = [game for game in games if not game.get('thumbnail')]
+                        
+                        thumbnail_details = {
+                            'total_games': len(games),
+                            'with_thumbnails': len(games_with_thumbnails),
+                            'without_thumbnails': len(games_without_thumbnails),
+                            'sample_thumbnails': [game.get('thumbnail') for game in games_with_thumbnails[:3]]
+                        }
+                        
+                        # Validate thumbnail URLs
+                        valid_thumbnails = 0
+                        invalid_thumbnails = []
+                        
+                        for game in games_with_thumbnails[:5]:  # Check first 5 thumbnails
+                            thumbnail_url = game.get('thumbnail')
+                            if thumbnail_url:
+                                # Check if URL looks like a BGG image URL
+                                if 'geekdo-images.com' in thumbnail_url or 'boardgamegeek.com' in thumbnail_url:
+                                    valid_thumbnails += 1
+                                else:
+                                    invalid_thumbnails.append(thumbnail_url)
+                        
+                        if len(games_with_thumbnails) > 0:
+                            if valid_thumbnails > 0 and len(invalid_thumbnails) == 0:
+                                self.log_test(f"Search Thumbnails - {query.title()} Success", True, 
+                                            f"Found {len(games)} games, {len(games_with_thumbnails)} with valid BGG thumbnails", 
+                                            thumbnail_details)
+                            else:
+                                self.log_test(f"Search Thumbnails - {query.title()} Quality", False, 
+                                            f"Invalid thumbnail URLs found: {invalid_thumbnails}", thumbnail_details)
+                        else:
+                            self.log_test(f"Search Thumbnails - {query.title()} Missing", False, 
+                                        f"No thumbnails found in {len(games)} results", thumbnail_details)
+                    else:
+                        self.log_test(f"Search Thumbnails - {query.title()}", False, "Empty search results", games)
+                else:
+                    self.log_test(f"Search Thumbnails - {query.title()}", False, f"HTTP {response.status_code}", response.text)
+                    
+            except Exception as e:
+                self.log_test(f"Search Thumbnails - {query.title()}", False, f"Exception: {str(e)}")
+
+    def test_thumbnail_performance(self):
+        """Test that search with thumbnails maintains reasonable performance"""
+        print("\n⚡ Testing Thumbnail Performance...")
+        
+        try:
+            start_time = time.time()
+            response = self.session.get(f"{API_BASE}/games/search/pandemic")
+            end_time = time.time()
+            
+            response_time = end_time - start_time
+            
+            if response.status_code == 200:
+                games = response.json()
+                
+                # Check if we got results with thumbnails
+                games_with_thumbnails = [game for game in games if game.get('thumbnail')]
+                
+                performance_details = {
+                    'response_time_seconds': round(response_time, 2),
+                    'total_games': len(games),
+                    'games_with_thumbnails': len(games_with_thumbnails),
+                    'acceptable_time_limit': 10.0
+                }
+                
+                if response_time < 10.0:  # Should complete within 10 seconds
+                    self.log_test("Thumbnail Performance", True, 
+                                f"Search with thumbnails completed in {response_time:.2f}s (acceptable)", 
+                                performance_details)
+                else:
+                    self.log_test("Thumbnail Performance", False, 
+                                f"Search took {response_time:.2f}s (too slow for production)", 
+                                performance_details)
+            else:
+                self.log_test("Thumbnail Performance", False, 
+                            f"HTTP {response.status_code} (response time: {response_time:.2f}s)", response.text)
+                
+        except Exception as e:
+            self.log_test("Thumbnail Performance", False, f"Exception: {str(e)}")
+
+    def test_thumbnail_error_handling(self):
+        """Test that search still works even if thumbnail fetching fails"""
+        print("\n🛡️ Testing Thumbnail Error Handling...")
+        
+        try:
+            # Test with a query that should return results
+            response = self.session.get(f"{API_BASE}/games/search/catan")
+            
+            if response.status_code == 200:
+                games = response.json()
+                
+                if isinstance(games, list) and len(games) > 0:
+                    # Even if thumbnail fetching fails, we should still get game data
+                    required_base_fields = ['id', 'name']
+                    all_games_have_base_fields = all(
+                        all(field in game for field in required_base_fields) 
+                        for game in games
+                    )
+                    
+                    if all_games_have_base_fields:
+                        # Check thumbnail field presence (should be present even if null)
+                        all_games_have_thumbnail_field = all('thumbnail' in game for game in games)
+                        
+                        if all_games_have_thumbnail_field:
+                            games_with_thumbnails = [game for game in games if game.get('thumbnail')]
+                            games_with_null_thumbnails = [game for game in games if game.get('thumbnail') is None]
+                            
+                            error_handling_details = {
+                                'total_games': len(games),
+                                'games_with_thumbnails': len(games_with_thumbnails),
+                                'games_with_null_thumbnails': len(games_with_null_thumbnails),
+                                'all_have_base_fields': all_games_have_base_fields,
+                                'all_have_thumbnail_field': all_games_have_thumbnail_field
+                            }
+                            
+                            self.log_test("Thumbnail Error Handling", True, 
+                                        "Search returns games with thumbnail field (even if null) when thumbnail fetching fails", 
+                                        error_handling_details)
+                        else:
+                            self.log_test("Thumbnail Error Handling", False, 
+                                        "Some games missing thumbnail field in response structure")
+                    else:
+                        self.log_test("Thumbnail Error Handling", False, 
+                                    "Games missing required base fields", games)
+                else:
+                    self.log_test("Thumbnail Error Handling", False, "Empty search results", games)
+            else:
+                self.log_test("Thumbnail Error Handling", False, 
+                            f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("Thumbnail Error Handling", False, f"Exception: {str(e)}")
+
+    def test_thumbnail_url_validation(self):
+        """Test that returned thumbnail URLs are valid BGG image URLs"""
+        print("\n🔗 Testing Thumbnail URL Validation...")
+        
+        try:
+            response = self.session.get(f"{API_BASE}/games/search/gloomhaven")
+            
+            if response.status_code == 200:
+                games = response.json()
+                games_with_thumbnails = [game for game in games if game.get('thumbnail')]
+                
+                if len(games_with_thumbnails) > 0:
+                    url_validation_results = {
+                        'total_thumbnails_checked': 0,
+                        'valid_bgg_urls': 0,
+                        'invalid_urls': [],
+                        'sample_valid_urls': []
+                    }
+                    
+                    for game in games_with_thumbnails[:5]:  # Check first 5 thumbnails
+                        thumbnail_url = game.get('thumbnail')
+                        if thumbnail_url:
+                            url_validation_results['total_thumbnails_checked'] += 1
+                            
+                            # Check if URL follows BGG image URL format
+                            is_valid_bgg_url = (
+                                thumbnail_url.startswith('https://') and
+                                ('geekdo-images.com' in thumbnail_url or 'boardgamegeek.com' in thumbnail_url) and
+                                (thumbnail_url.endswith('.jpg') or thumbnail_url.endswith('.png') or thumbnail_url.endswith('.jpeg'))
+                            )
+                            
+                            if is_valid_bgg_url:
+                                url_validation_results['valid_bgg_urls'] += 1
+                                if len(url_validation_results['sample_valid_urls']) < 3:
+                                    url_validation_results['sample_valid_urls'].append(thumbnail_url)
+                            else:
+                                url_validation_results['invalid_urls'].append(thumbnail_url)
+                    
+                    if url_validation_results['valid_bgg_urls'] > 0 and len(url_validation_results['invalid_urls']) == 0:
+                        self.log_test("Thumbnail URL Validation", True, 
+                                    f"All {url_validation_results['valid_bgg_urls']} thumbnail URLs are valid BGG image URLs", 
+                                    url_validation_results)
+                    elif url_validation_results['valid_bgg_urls'] > 0:
+                        self.log_test("Thumbnail URL Validation", False, 
+                                    f"Some invalid URLs found: {url_validation_results['invalid_urls']}", 
+                                    url_validation_results)
+                    else:
+                        self.log_test("Thumbnail URL Validation", False, 
+                                    "No valid BGG thumbnail URLs found", url_validation_results)
+                else:
+                    self.log_test("Thumbnail URL Validation", False, 
+                                "No games with thumbnails found for validation")
+            else:
+                self.log_test("Thumbnail URL Validation", False, 
+                            f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("Thumbnail URL Validation", False, f"Exception: {str(e)}")
+
+    def test_search_result_limit(self):
+        """Test that search limits results to top 10 for performance"""
+        print("\n📊 Testing Search Result Limit...")
+        
+        try:
+            # Use a broad search term that should return many results
+            response = self.session.get(f"{API_BASE}/games/search/war")
+            
+            if response.status_code == 200:
+                games = response.json()
+                
+                limit_details = {
+                    'total_results': len(games),
+                    'expected_limit': 10,
+                    'within_limit': len(games) <= 10
+                }
+                
+                if len(games) <= 10:
+                    self.log_test("Search Result Limit", True, 
+                                f"Search properly limited to {len(games)} results (≤10)", limit_details)
+                else:
+                    self.log_test("Search Result Limit", False, 
+                                f"Search returned {len(games)} results, exceeding limit of 10", limit_details)
+            else:
+                self.log_test("Search Result Limit", False, 
+                            f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("Search Result Limit", False, f"Exception: {str(e)}")
+
     def test_bgg_search_validation(self):
         """Test BGG search input validation"""
         try:
