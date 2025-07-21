@@ -1013,25 +1013,45 @@ function AppContent() {
   };
 
   const SearchResultCard = ({ game }) => {
-    // Use a placeholder image URL for BoardGameGeek games
-    const placeholderImage = `https://cf.geekdo-images.com/itemrep/img/placeholder.png`;
-    const gameImageUrl = game.thumbnail || placeholderImage;
+    // Generate a consistent color based on game name for placeholder
+    const getPlaceholderColor = (name) => {
+      const colors = [
+        'bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-red-500', 
+        'bg-yellow-500', 'bg-indigo-500', 'bg-pink-500', 'bg-gray-500'
+      ];
+      const index = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      return colors[index % colors.length];
+    };
+    
+    const placeholderColor = getPlaceholderColor(game.name);
+    const gameInitial = game.name.charAt(0).toUpperCase();
     
     return (
       <div 
         className="flex items-center p-4 bg-white rounded-lg shadow hover:shadow-md cursor-pointer transition-shadow"
         onClick={() => getGameDetails(game.id)}
       >
-        {/* Game Image */}
+        {/* Game Image or Placeholder */}
         <div className="w-16 h-16 flex-shrink-0 mr-4">
-          <img
-            src={gameImageUrl}
-            alt={game.name}
-            className="w-full h-full object-cover rounded-lg border border-gray-200"
-            onError={(e) => {
-              e.target.src = '/api/placeholder/64/64';
-            }}
-          />
+          {game.thumbnail ? (
+            <img
+              src={game.thumbnail}
+              alt={game.name}
+              className="w-full h-full object-cover rounded-lg border border-gray-200"
+              onError={(e) => {
+                // If image fails, replace with colored placeholder
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
+          ) : null}
+          
+          {/* Colored placeholder with initial */}
+          <div 
+            className={`w-full h-full ${placeholderColor} rounded-lg flex items-center justify-center text-white font-bold text-xl border border-gray-200 ${game.thumbnail ? 'hidden' : 'flex'}`}
+          >
+            {gameInitial}
+          </div>
         </div>
         
         {/* Game Info */}
