@@ -70,6 +70,7 @@ class GameSearch(BaseModel):
     id: str
     name: str
     year: Optional[str] = None
+    thumbnail: Optional[str] = None
 
 class GameDetails(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
