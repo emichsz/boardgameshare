@@ -98,6 +98,14 @@ const translations = {
     gridView: 'Rács nézet',
     listView: 'Lista nézet',
     
+    // Sorrendezés
+    sortBy: 'Rendezés',
+    sortByRating: 'Értékelés szerint',
+    sortByAlphabetical: 'ABC sorrend',
+    sortByPlaytime: 'Játékidő szerint',
+    sortOrderAsc: 'Növekvő',
+    sortOrderDesc: 'Csökkenő',
+    
     // Korhatár
     minAge: 'Korhatár',
     ageYears: 'éves kortól',
