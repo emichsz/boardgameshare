@@ -935,7 +935,53 @@ class BoardGameAPITester:
         except Exception as e:
             self.log_test("Backend Stability - Health", False, f"Exception: {str(e)}")
 
-    def run_translation_tests(self):
+    def run_thumbnail_tests(self):
+        """Run thumbnail-focused tests as requested in the review"""
+        print("🖼️ Starting BGG Search Thumbnail Feature Tests")
+        print("=" * 60)
+        
+        # 1. Backend Stability Check
+        self.test_backend_stability()
+        
+        # 2. Basic BGG Search (existing functionality)
+        print("\n🔍 Testing Basic BGG Search...")
+        self.test_bgg_search_validation()
+        search_result = self.test_bgg_search()
+        
+        # 3. Thumbnail-specific tests
+        self.test_bgg_search_with_thumbnails()
+        
+        # 4. Thumbnail URL validation
+        self.test_thumbnail_url_validation()
+        
+        # 5. Performance testing
+        self.test_thumbnail_performance()
+        
+        # 6. Error handling
+        self.test_thumbnail_error_handling()
+        
+        # 7. Result limit testing
+        self.test_search_result_limit()
+        
+        # 8. Summary
+        print("\n📊 Thumbnail Test Summary")
+        print("=" * 60)
+        
+        passed = sum(1 for result in self.test_results if result['success'])
+        total = len(self.test_results)
+        
+        print(f"Tests Passed: {passed}/{total}")
+        print(f"Success Rate: {(passed/total)*100:.1f}%")
+        
+        if passed < total:
+            print("\n❌ Failed Tests:")
+            for result in self.test_results:
+                if not result['success']:
+                    print(f"   - {result['test']}: {result['details']}")
+        else:
+            print("\n✅ All thumbnail tests passed!")
+        
+        return passed == total
         """Run OpenAI translation-focused tests"""
         print("🌍 Starting OpenAI Translation Feature Tests")
         print("=" * 60)
