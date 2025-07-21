@@ -372,24 +372,54 @@ async def search_games(query: str):
         root = etree.fromstring(xml_content)
         
         games = []
+        game_ids = []
+        
+        # First pass: collect game data from search
         for item in root.xpath("//item"):
             name_elem = item.find("name")
             year_elem = item.find("yearpublished")
             game_id = item.get("id")
             
-            # Create BGG thumbnail URL
-            # Note: BGG doesn't provide thumbnails in search, but we can try to construct a likely URL
-            # This is a best-effort approach - some images might not exist
-            thumbnail_url = f"https://cf.geekdo-images.com/thumb/img/{game_id}"
-            
-            games.append(GameSearch(
-                id=game_id,
-                name=name_elem.get("value") if name_elem is not None else "Unknown",
-                year=year_elem.get("value") if year_elem is not None else None,
-                thumbnail=thumbnail_url
-            ))
+            game_data = {
+                "id": game_id,
+                "name": name_elem.get("value") if name_elem is not None else "Unknown",
+                "year": year_elem.get("value") if year_elem is not None else None,
+                "thumbnail": None
+            }
+            games.append(game_data)
+            game_ids.append(game_id)
         
-        return games[:10]  # Return top 10 matches
+        # Limit to top 10 matches for performance
+        games = games[:10]
+        game_ids = game_ids[:10]
+        
+        # Second pass: fetch thumbnails for the games
+        if game_ids:
+            try:
+                ids_string = ",".join(game_ids)
+                details_xml = await fetch_bgg_data(f"/thing?id={ids_string}&type=boardgame")
+                details_root = etree.fromstring(details_xml)
+                
+                # Create a map of ID to thumbnail
+                thumbnail_map = {}
+                for item in details_root.xpath("//item"):
+                    item_id = item.get("id")
+                    thumbnail_elem = item.find("thumbnail")
+                    if thumbnail_elem is not None and thumbnail_elem.text:
+                        thumbnail_map[item_id] = thumbnail_elem.text
+                
+                # Update games with thumbnails
+                for game in games:
+                    if game["id"] in thumbnail_map:
+                        game["thumbnail"] = thumbnail_map[game["id"]]
+                        
+            except Exception as e:
+                logger.warning(f"Failed to fetch thumbnails for search results: {e}")
+                # Continue without thumbnails
+        
+        # Convert to Pydantic models
+        game_search_results = [GameSearch(**game) for game in games]
+        return game_search_results
         
     except etree.XMLSyntaxError:
         logger.error("Invalid XML from BGG search API")
