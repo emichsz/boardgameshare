@@ -322,6 +322,8 @@ function AppContent() {
     category: '',
     designer: ''
   });
+  const [sortBy, setSortBy] = useState('rating'); // 'rating', 'alphabetical', 'playtime'
+  const [sortOrder, setSortOrder] = useState('desc'); // 'asc', 'desc'
 
   // HTML entitások dekódolása
   const decodeHtmlEntities = (str) => {
