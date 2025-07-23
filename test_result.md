@@ -269,6 +269,12 @@ test_plan:
     - "Game Search UI"
   test_all: false
   test_priority: "high_first"
+  authentication_required: true
+  blocked_features:
+    - "Game search with thumbnail images"
+    - "Game details modal with separate descriptions"
+    - "Game editing modal with Hungarian description fields"
+    - "Sorting and grid display functionality"
 
 agent_communication:
     - agent: "main"
