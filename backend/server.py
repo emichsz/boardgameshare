@@ -522,6 +522,30 @@ async def get_game_details(bgg_id: str):
                 if game_details.description_short:
                     hungarian_short_description = await translate_to_hungarian(game_details.description_short)
                     game_details.description_short_hu = hungarian_short_description
+                else:
+                    # If no short description available, create one from the long description
+                    if game_details.description_hu and len(game_details.description_hu) > 150:
+                        # Extract first meaningful sentence from Hungarian translation
+                        import re
+                        sentences = re.split(r'[.!?]+', game_details.description_hu)
+                        if sentences and len(sentences) > 0:
+                            first_sentence = sentences[0].strip()
+                            if len(first_sentence) > 100:  # If first sentence is long enough
+                                game_details.description_short_hu = first_sentence + "."
+                            elif len(sentences) > 1:  # Try first two sentences
+                                second_sentence = sentences[1].strip() if len(sentences) > 1 else ""
+                                combined = f"{first_sentence}. {second_sentence}".strip()
+                                if len(combined) <= 200:
+                                    game_details.description_short_hu = combined + "."
+                                else:
+                                    game_details.description_short_hu = first_sentence + "."
+                            else:
+                                game_details.description_short_hu = first_sentence + "."
+                        else:
+                            # Fallback: take first 150 characters
+                            game_details.description_short_hu = game_details.description_hu[:150] + "..."
+                    elif game_details.description_hu:
+                        game_details.description_short_hu = game_details.description_hu[:150] + "..."
                     
                 logger.info(f"Auto-translated game details to Hungarian: {game_details.title} -> {hungarian_title}")
                 
