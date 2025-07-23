@@ -314,19 +314,44 @@ async def google_auth(auth_request: GoogleAuthRequest):
         
         user_info = response.json()
         
-        # Check if user exists
+        # Check if user exists (by google_id or email)
         user = await db.users.find_one({"google_id": user_info["sub"]})
         
         if not user:
-            # Create new user
-            new_user = User(
-                google_id=user_info["sub"],
-                email=user_info["email"],
-                name=user_info["name"],
-                picture=user_info.get("picture")
-            )
-            await db.users.insert_one(new_user.dict())
-            user = new_user.dict()
+            # Check if user exists by email (for existing users without google_id)
+            user = await db.users.find_one({"email": user_info["email"]})
+            
+            if user:
+                # Update existing user with google_id
+                await db.users.update_one(
+                    {"email": user_info["email"]},
+                    {"$set": {
+                        "google_id": user_info["sub"],
+                        "name": user_info["name"],
+                        "picture": user_info.get("picture")
+                    }}
+                )
+                # Reload user data
+                user = await db.users.find_one({"email": user_info["email"]})
+            else:
+                # Create new user
+                new_user = User(
+                    google_id=user_info["sub"],
+                    email=user_info["email"],
+                    name=user_info["name"],
+                    picture=user_info.get("picture")
+                )
+                try:
+                    result = await db.users.insert_one(new_user.dict())
+                    new_user_dict = new_user.dict()
+                    new_user_dict["id"] = str(result.inserted_id)
+                    user = new_user_dict
+                except Exception as insert_error:
+                    # Handle potential duplicate key error
+                    logger.error(f"User creation error: {insert_error}")
+                    user = await db.users.find_one({"email": user_info["email"]})
+                    if not user:
+                        raise HTTPException(status_code=500, detail="Failed to create user")
         else:
             # Update existing user
             await db.users.update_one(
