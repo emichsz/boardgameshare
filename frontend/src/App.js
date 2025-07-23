@@ -618,6 +618,88 @@ function AppContent() {
       if (searchFilter) params.append('search', searchFilter);
       if (myGamesOnly) params.append('my_games_only', 'true');
       
+      // Enhanced filter parameters
+      // Player count filters
+      if (newFilters.players.length > 0) {
+        // Convert frontend filter values to backend parameters
+        let min_players = null;
+        let max_players = null;
+        
+        if (newFilters.players.includes('1')) {
+          min_players = 1;
+          max_players = 1;
+        } else {
+          if (newFilters.players.includes('2')) {
+            min_players = min_players === null ? 2 : Math.min(min_players, 2);
+            max_players = max_players === null ? 2 : Math.max(max_players, 2);
+          }
+          if (newFilters.players.includes('3-4')) {
+            min_players = min_players === null ? 3 : Math.min(min_players, 3);
+            max_players = max_players === null ? 4 : Math.max(max_players, 4);
+          }
+          if (newFilters.players.includes('5+')) {
+            min_players = min_players === null ? 5 : Math.min(min_players, 5);
+            max_players = null; // No upper limit for 5+
+          }
+        }
+        
+        if (min_players !== null) params.append('min_players', min_players.toString());
+        if (max_players !== null) params.append('max_players', max_players.toString());
+      }
+      
+      // Duration filters
+      if (newFilters.duration.length > 0) {
+        let min_playtime = null;
+        let max_playtime = null;
+        
+        newFilters.duration.forEach(durationFilter => {
+          switch (durationFilter) {
+            case '0-30':
+              min_playtime = min_playtime === null ? 0 : Math.min(min_playtime, 0);
+              max_playtime = max_playtime === null ? 30 : Math.max(max_playtime, 30);
+              break;
+            case '30-60':
+              min_playtime = min_playtime === null ? 30 : Math.min(min_playtime, 30);
+              max_playtime = max_playtime === null ? 60 : Math.max(max_playtime, 60);
+              break;
+            case '60-120':
+              min_playtime = min_playtime === null ? 60 : Math.min(min_playtime, 60);
+              max_playtime = max_playtime === null ? 120 : Math.max(max_playtime, 120);
+              break;
+            case '120+':
+              min_playtime = min_playtime === null ? 120 : Math.min(min_playtime, 120);
+              max_playtime = null; // No upper limit for 120+
+              break;
+          }
+        });
+        
+        if (min_playtime !== null) params.append('min_playtime', min_playtime.toString());
+        if (max_playtime !== null) params.append('max_playtime', max_playtime.toString());
+      }
+      
+      // Age filters
+      if (newFilters.age.length > 0) {
+        const ages = newFilters.age.map(age => parseInt(age.replace('+', '')));
+        const min_age = Math.min(...ages);
+        params.append('min_age', min_age.toString());
+      }
+      
+      // Type filters
+      if (newFilters.type.length > 0) {
+        params.append('types', newFilters.type.join(','));
+      }
+      
+      // Mood filters
+      if (newFilters.mood.length > 0) {
+        params.append('moods', newFilters.mood.join(','));
+      }
+      
+      // Rating filters
+      if (newFilters.rating[0] > 5 || newFilters.rating[1] < 10) {
+        params.append('min_rating', newFilters.rating[0].toString());
+        params.append('max_rating', newFilters.rating[1].toString());
+      }
+      
       const response = await axios.get(`${API_BASE_URL}/api/games?${params.toString()}`);
       let filteredGames = response.data;
       
