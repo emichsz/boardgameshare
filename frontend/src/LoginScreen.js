@@ -38,7 +38,7 @@ const translations = {
 };
 
 export default function LoginScreen() {
-  const { handleGoogleLoginSuccess, handleGoogleLoginError, error, setError } = useAuth();
+  const { handleGoogleLoginSuccess, handleGoogleLoginError, loginAsTestUser, error, setError } = useAuth();
   const [language, setLanguage] = useState('hu');
 
   const t = (key) => {
@@ -53,6 +53,11 @@ export default function LoginScreen() {
   const toggleLanguage = () => {
     setLanguage(prev => prev === 'hu' ? 'en' : 'hu');
     setError(null); // Clear any errors when switching language
+  };
+
+  const handleTestLogin = () => {
+    setError(null);
+    loginAsTestUser();
   };
 
   return (
