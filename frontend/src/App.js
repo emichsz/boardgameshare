@@ -982,43 +982,66 @@ function AppContent() {
             </p>
           )}
 
-          {/* Tulajdonosok megjelenítése */}
+          {/* Tulajdonosok lenyíló rész */}
           {game.owners && game.owners.length > 0 && (
-            <div className="mb-3 p-3 bg-gray-50 rounded-lg">
-              <p className="text-xs font-medium text-gray-700 mb-2">
-                {t('owners')} ({game.owners.length}):
-              </p>
-              <div className="flex flex-wrap gap-1">
-                {game.owners.slice(0, 3).map((owner, index) => (
-                  <span
-                    key={index}
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      owner.user_id === user?.id 
-                        ? 'bg-blue-100 text-blue-800' 
-                        : 'bg-gray-100 text-gray-700'
-                    }`}
-                  >
-                    {owner.user_name}
-                  </span>
-                ))}
-                {game.owners.length > 3 && (
-                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                    +{game.owners.length - 3} {t('multipleOwners')}
-                  </span>
-                )}
-              </div>
-              
-              {/* "Nekem is megvan" gomb */}
-              {!game.owners.some(owner => owner.user_id === user?.id) && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    addToMyCollection(game.id);
-                  }}
-                  className="mt-2 w-full bg-green-100 text-green-700 px-3 py-2 rounded-lg text-xs font-medium hover:bg-green-200 transition-colors"
+            <div className="mb-3 border border-gray-200 rounded-lg">
+              {/* Tulajdonosok header - kattintható */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOwnersExpanded(!ownersExpanded);
+                }}
+                className="w-full p-3 bg-gray-50 rounded-t-lg flex items-center justify-between text-left hover:bg-gray-100 transition-colors"
+              >
+                <span className="text-sm font-medium text-gray-700">
+                  {t('owners')} ({game.owners.length})
+                </span>
+                <svg 
+                  className={`w-4 h-4 text-gray-500 transform transition-transform ${ownersExpanded ? 'rotate-180' : ''}`} 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
                 >
-                  {t('addToMyCollection')}
-                </button>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {/* Lenyíló tartalom */}
+              {ownersExpanded && (
+                <div className="p-3 border-t border-gray-200">
+                  {/* Tulajdonosok listája */}
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {game.owners.map((owner, index) => (
+                      <span
+                        key={index}
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          owner.user_id === user?.id 
+                            ? 'bg-blue-100 text-blue-800' 
+                            : 'bg-gray-100 text-gray-700'
+                        }`}
+                      >
+                        {owner.user_name}
+                      </span>
+                    ))}
+                  </div>
+                  
+                  {/* "Nekem is megvan" kapcsoló */}
+                  <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                    <span className="text-sm text-gray-600">{t('addToMyCollection')}</span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={userOwnsThis}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          handleOwnershipToggle();
+                        }}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                  </div>
+                </div>
               )}
             </div>
           )}
