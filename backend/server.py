@@ -361,7 +361,12 @@ async def google_auth(auth_request: GoogleAuthRequest):
                     "picture": user_info.get("picture")
                 }}
             )
-            user["id"] = str(user.get("_id", user.get("id", "")))
+            
+        # Ensure user has proper ID
+        if "_id" in user and "id" not in user:
+            user["id"] = str(user["_id"])
+        elif "id" not in user:
+            user["id"] = str(user.get("_id", ""))
         
         # Create access token
         token = create_access_token(user["id"], user["email"])
