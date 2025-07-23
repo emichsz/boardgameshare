@@ -360,6 +360,7 @@ function AppContent() {
   });
   const [sortBy, setSortBy] = useState('rating'); // 'rating', 'alphabetical', 'playtime'
   const [sortOrder, setSortOrder] = useState('desc'); // 'asc', 'desc'
+  const [myGamesOnly, setMyGamesOnly] = useState(false); // false = minden játék, true = csak saját
 
   // HTML entitások dekódolása
   const decodeHtmlEntities = (str) => {
