@@ -271,16 +271,11 @@ metadata:
 test_plan:
   current_focus:
     - "Game Search UI"
-  stuck_tasks:
-    - "Game Search UI"
+  stuck_tasks: []
   test_all: false
   test_priority: "high_first"
   authentication_required: true
-  blocked_features:
-    - "Game search with thumbnail images"
-    - "Game details modal with separate descriptions"
-    - "Game editing modal with Hungarian description fields"
-    - "Sorting and grid display functionality"
+  blocked_features: []
 
 agent_communication:
     - agent: "main"
