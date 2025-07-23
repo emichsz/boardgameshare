@@ -1070,28 +1070,67 @@ async def update_game(game_id: str, update_data: dict, current_user: User = Depe
 
 @app.delete("/api/games/{game_id}")
 async def delete_game(game_id: str, current_user: User = Depends(get_current_user)):
-    """Remove a game from the collection"""
+    """Remove a game from the collection or remove user ownership"""
     try:
-        logger.info(f"Deleting game with ID: {game_id}")
+        logger.info(f"Deleting game with ID: {game_id} for user: {current_user.id}")
         
-        # Try both id fields and ObjectId
+        # Keresés játékra
         query_conditions = [{"id": game_id}]
         
-        # Try ObjectId if the game_id looks like one
         try:
             if len(game_id) == 24:  # ObjectId length check
                 query_conditions.append({"_id": ObjectId(game_id)})
         except:
             pass
             
-        result = await db.games.delete_one({"$or": query_conditions})
-        logger.info(f"Delete result: deleted_count={result.deleted_count}")
+        game = await db.games.find_one({"$or": query_conditions})
         
-        if result.deleted_count == 0:
+        if not game:
             raise HTTPException(status_code=404, detail="Game not found")
         
-        return {"message": "Game deleted successfully"}
+        # Ellenőrizzük az owners listát
+        owners_list = game.get("owners", [])
         
+        # Backwards compatibility
+        if not owners_list and game.get("owner_id"):
+            owners_list = [{
+                "user_id": game.get("owner_id"),
+                "user_name": game.get("owner_name", "Unknown"),
+                "added_date": datetime.now(),
+                "personal_notes": game.get("personal_notes", "")
+            }]
+        
+        # Ellenőrizzük, hogy a user tulajdonosa-e a játéknak
+        user_is_owner = any(owner.get("user_id") == current_user.id for owner in owners_list)
+        
+        if not user_is_owner:
+            raise HTTPException(status_code=403, detail="You don't own this game")
+        
+        # Eltávolítjuk a felhasználót a tulajdonosok listájából
+        updated_owners = [owner for owner in owners_list if owner.get("user_id") != current_user.id]
+        
+        if len(updated_owners) == 0:
+            # Ha ez volt az utolsó tulajdonos, töröljük a játékot teljesen
+            result = await db.games.delete_one({"$or": query_conditions})
+            logger.info(f"Game completely deleted - was last owner. Deleted count: {result.deleted_count}")
+            
+            if result.deleted_count == 0:
+                raise HTTPException(status_code=404, detail="Game not found")
+            
+            return {"message": "Game completely removed (you were the last owner)"}
+        
+        else:
+            # Frissítjük a játékot a megmaradt tulajdonosokkal
+            await db.games.update_one(
+                {"$or": query_conditions},
+                {"$set": {"owners": updated_owners}}
+            )
+            
+            logger.info(f"User removed from game ownership. Remaining owners: {len(updated_owners)}")
+            return {"message": f"Removed from your collection. Game still owned by {len(updated_owners)} other user(s)"}
+        
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error deleting game: {e}")
         raise HTTPException(status_code=500, detail="Failed to delete game")
