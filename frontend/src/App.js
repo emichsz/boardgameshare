@@ -87,6 +87,50 @@ const translations = {
     showFilters: 'Szűrők megjelenítése',
     hideFilters: 'Szűrők elrejtése',
     
+    // Új szűrők
+    filterPlayers: 'Játékosok száma',
+    filterDuration: 'Játékidő',
+    filterAge: 'Ajánlott korosztály',
+    filterType: 'Játék típusa',
+    filterMood: 'Játék hangulata',
+    filterRating: 'Értékelés',
+    
+    // Játékosok szűrő
+    players1: '1 játékos',
+    players2: '2 játékos',
+    players3to4: '3-4 játékos', 
+    players5plus: '5+ játékos',
+    
+    // Játékidő szűrő
+    duration0to30: '0-30 perc',
+    duration30to60: '30-60 perc',
+    duration60to120: '60-120 perc',
+    duration120plus: '120+ perc',
+    
+    // Korosztály
+    age3plus: '3+',
+    age6plus: '6+',
+    age10plus: '10+',
+    age14plus: '14+',
+    age18plus: '18+',
+    
+    // Játék típusa
+    typeParty: 'Party',
+    typeStrategic: 'Stratégiai',
+    typeFamily: 'Családi',
+    typeCooperative: 'Kooperatív',
+    typeEducational: 'Oktatási',
+    typeChildren: 'Gyerek',
+    typeSolo: 'Egyszemélyes',
+    
+    // Hangulat/stílus
+    moodLight: 'Könnyed',
+    moodHumorous: 'Humoros',
+    moodThinking: 'Agyalós',
+    moodCompetitive: 'Kompetitív',
+    moodCreative: 'Kreatív',
+    moodNarrative: 'Narratív',
+    
     // Tulajdonosok
     owners: 'Tulajdonosok',
     ownedBy: 'Birtokosa',
