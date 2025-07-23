@@ -870,6 +870,47 @@ function AppContent() {
             </p>
           )}
 
+          {/* Tulajdonosok megjelenítése */}
+          {game.owners && game.owners.length > 0 && (
+            <div className="mb-3 p-3 bg-gray-50 rounded-lg">
+              <p className="text-xs font-medium text-gray-700 mb-2">
+                {t('owners')} ({game.owners.length}):
+              </p>
+              <div className="flex flex-wrap gap-1">
+                {game.owners.slice(0, 3).map((owner, index) => (
+                  <span
+                    key={index}
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      owner.user_id === user?.id 
+                        ? 'bg-blue-100 text-blue-800' 
+                        : 'bg-gray-100 text-gray-700'
+                    }`}
+                  >
+                    {owner.user_name}
+                  </span>
+                ))}
+                {game.owners.length > 3 && (
+                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                    +{game.owners.length - 3} {t('multipleOwners')}
+                  </span>
+                )}
+              </div>
+              
+              {/* "Nekem is megvan" gomb */}
+              {!game.owners.some(owner => owner.user_id === user?.id) && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    addToMyCollection(game.id);
+                  }}
+                  className="mt-2 w-full bg-green-100 text-green-700 px-3 py-2 rounded-lg text-xs font-medium hover:bg-green-200 transition-colors"
+                >
+                  {t('addToMyCollection')}
+                </button>
+              )}
+            </div>
+          )}
+
           {/* Kölcsönzési információ */}
           {game.status === 'borrowed' && (
             <div className="bg-orange-50 p-2 rounded-lg mb-3 text-xs">
