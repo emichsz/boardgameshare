@@ -449,6 +449,14 @@ function AppContent() {
   const [sortBy, setSortBy] = useState('rating'); // 'rating', 'alphabetical', 'playtime'
   const [sortOrder, setSortOrder] = useState('desc'); // 'asc', 'desc'
   const [myGamesOnly, setMyGamesOnly] = useState(false); // false = minden játék, true = csak saját
+  const [newFilters, setNewFilters] = useState({
+    players: [], // ['1', '2', '3-4', '5+']
+    duration: [], // ['0-30', '30-60', '60-120', '120+']
+    age: [], // ['3+', '6+', '10+', '14+', '18+']
+    type: [], // ['party', 'strategic', 'family', 'cooperative', 'educational', 'children', 'solo']
+    mood: [], // ['light', 'humorous', 'thinking', 'competitive', 'creative', 'narrative']
+    rating: [5, 10] // [min, max] rating range
+  });
 
   // HTML entitások dekódolása
   const decodeHtmlEntities = (str) => {
