@@ -844,6 +844,17 @@ async def get_collection(
     category: Optional[str] = None,
     search: Optional[str] = None,
     my_games_only: Optional[bool] = False,  # Szűrés: csak saját játékok
+    # Enhanced filtering parameters
+    min_players: Optional[int] = None,
+    max_players: Optional[int] = None,
+    min_playtime: Optional[int] = None,
+    max_playtime: Optional[int] = None,
+    min_age: Optional[int] = None,
+    max_age: Optional[int] = None,
+    min_rating: Optional[float] = None,
+    max_rating: Optional[float] = None,
+    moods: Optional[str] = None,  # Comma-separated mood filters
+    types: Optional[str] = None,  # Comma-separated type filters
     current_user: User = Depends(get_current_user)
 ):
     """Get games collection with optional filtering"""
