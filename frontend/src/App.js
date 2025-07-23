@@ -181,6 +181,8 @@ const translations = {
     // Hungarian localization fields
     hungarianTitle: 'Hungarian Title',
     hungarianDescription: 'Hungarian Description',
+    hungarianShortDescription: 'Hungarian Short Description',
+    hungarianLongDescription: 'Hungarian Long Description',
     gameLanguage: 'Game Language',
     hungarian: 'Hungarian',
     english: 'English',
