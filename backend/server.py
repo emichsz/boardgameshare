@@ -281,6 +281,83 @@ def clean_html(text: str) -> str:
     clean = re.compile('<.*?>')
     return re.sub(clean, '', text)
 
+def categorize_game_type(categories: List[str]) -> List[str]:
+    """Categorize game types based on BGG categories"""
+    game_types = []
+    
+    # Strategy games
+    strategy_keywords = ['Strategy Game', 'Abstract Strategy', 'Economic', 'Political', 'Territory Building', 'Area Control', 'Civilization', 'City Building']
+    if any(keyword in categories for keyword in strategy_keywords):
+        game_types.append('Strategy')
+    
+    # Party games
+    party_keywords = ['Party Game', 'Humor', 'Trivia', 'Word Game', 'Deduction', 'Bluffing']
+    if any(keyword in categories for keyword in party_keywords):
+        game_types.append('Party')
+    
+    # Family games
+    family_keywords = ['Family Game', 'Children\'s Game', 'Educational']
+    if any(keyword in categories for keyword in family_keywords):
+        game_types.append('Family')
+    
+    # Thematic games
+    thematic_keywords = ['Adventure', 'Fantasy', 'Science Fiction', 'Horror', 'Medieval', 'Pirates', 'Zombies', 'Space Exploration', 'Post-Napoleonic']
+    if any(keyword in categories for keyword in thematic_keywords):
+        game_types.append('Thematic')
+    
+    # War games
+    war_keywords = ['Wargame', 'World War II', 'World War I', 'American Civil War', 'Napoleonic', 'Ancient', 'Modern Warfare']
+    if any(keyword in categories for keyword in war_keywords):
+        game_types.append('War')
+    
+    # Card games
+    card_keywords = ['Card Game', 'Collectible Components']
+    if any(keyword in categories for keyword in card_keywords):
+        game_types.append('Card')
+    
+    # Dice games
+    dice_keywords = ['Dice']
+    if any(keyword in categories for keyword in dice_keywords):
+        game_types.append('Dice')
+    
+    return game_types if game_types else ['Other']
+
+def categorize_game_mood(categories: List[str]) -> List[str]:
+    """Categorize game moods based on BGG categories"""
+    game_moods = []
+    
+    # Competitive
+    competitive_keywords = ['Strategy Game', 'Economic', 'Territory Building', 'Area Control', 'Wargame', 'Racing']
+    if any(keyword in categories for keyword in competitive_keywords):
+        game_moods.append('Competitive')
+    
+    # Cooperative
+    cooperative_keywords = ['Cooperative Game']
+    if any(keyword in categories for keyword in cooperative_keywords):
+        game_moods.append('Cooperative')
+    
+    # Social
+    social_keywords = ['Party Game', 'Negotiation', 'Bluffing', 'Deduction', 'Trivia']
+    if any(keyword in categories for keyword in social_keywords):
+        game_moods.append('Social')
+    
+    # Relaxing
+    relaxing_keywords = ['Abstract Strategy', 'Puzzle', 'Educational', 'Family Game']
+    if any(keyword in categories for keyword in relaxing_keywords):
+        game_moods.append('Relaxing')
+    
+    # Intense
+    intense_keywords = ['Horror', 'Survival', 'Real-time', 'Action / Dexterity']
+    if any(keyword in categories for keyword in intense_keywords):
+        game_moods.append('Intense')
+    
+    # Creative
+    creative_keywords = ['City Building', 'Civilization', 'Exploration', 'Adventure']
+    if any(keyword in categories for keyword in creative_keywords):
+        game_moods.append('Creative')
+    
+    return game_moods if game_moods else ['Neutral']
+
 async def fetch_bgg_data(endpoint: str, retries: int = 3) -> bytes:
     """Fetch data from BGG API with retries"""
     async with httpx.AsyncClient(timeout=30.0) as client:
