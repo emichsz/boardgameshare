@@ -1961,7 +1961,7 @@ function AppContent() {
                   : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
               }`}
             >
-              {t('allGames')} ({games.length})
+              {t('allGames')} ({allGamesCount})
             </button>
             <button
               onClick={() => setMyGamesOnly(true)}
@@ -1971,7 +1971,7 @@ function AppContent() {
                   : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
               }`}
             >
-              {t('myGames')}
+              {t('myGames')} ({myGamesCount})
             </button>
           </div>
           
