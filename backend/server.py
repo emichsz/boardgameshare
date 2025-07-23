@@ -156,32 +156,82 @@ oauth.register(
 
 # Helper functions
 async def translate_to_hungarian(text: str) -> str:
-    """Translate English text to Hungarian using OpenAI API"""
+    """Translate English text to Hungarian using OpenAI ChatGPT"""
     if not text or len(text.strip()) == 0:
         return ""
     
     try:
         if not openai_client:
-            logger.warning("OpenAI client not configured, returning original text")
+            logger.warning("OpenAI client not initialized")
             return text
             
-        response = openai_client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a professional translator. Translate the given English text to Hungarian. Only return the translated text, nothing else."},
-                {"role": "user", "content": text}
-            ],
-            max_tokens=1000,
-            temperature=0.3
+        response = await asyncio.get_event_loop().run_in_executor(
+            None,
+            lambda: openai_client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are a professional translator. Translate the following English text to natural, fluent Hungarian. Maintain the meaning and tone of the original text."},
+                    {"role": "user", "content": f"Translate this to Hungarian: {text}"}
+                ],
+                max_tokens=len(text) * 2,  # Allow enough tokens for translation
+                temperature=0.3
+            )
         )
         
         translated_text = response.choices[0].message.content.strip()
+        logger.info(f"Successfully translated text ({len(text)} chars) to Hungarian ({len(translated_text)} chars)")
         return translated_text
         
     except Exception as e:
         logger.error(f"Translation error: {e}")
         # Return original text if translation fails
         return text
+
+async def create_short_description_hungarian(long_description_hu: str) -> str:
+    """Create a short Hungarian description from a long Hungarian description using AI"""
+    if not long_description_hu or len(long_description_hu.strip()) == 0:
+        return ""
+    
+    try:
+        if not openai_client:
+            logger.warning("OpenAI client not initialized")
+            return long_description_hu[:150] + "..."
+            
+        response = await asyncio.get_event_loop().run_in_executor(
+            None,
+            lambda: openai_client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are a professional game description writer. Create a concise, engaging 1-2 sentence summary (max 200 characters) from the provided Hungarian game description. Focus on the core gameplay and theme."},
+                    {"role": "user", "content": f"Create a short summary from this Hungarian game description: {long_description_hu}"}
+                ],
+                max_tokens=100,
+                temperature=0.3
+            )
+        )
+        
+        short_description = response.choices[0].message.content.strip()
+        
+        # Ensure it's not too long
+        if len(short_description) > 250:
+            short_description = short_description[:247] + "..."
+            
+        logger.info(f"Successfully generated short Hungarian description ({len(short_description)} chars)")
+        return short_description
+        
+    except Exception as e:
+        logger.error(f"Short description generation error: {e}")
+        # Fallback: extract first meaningful part
+        import re
+        sentences = re.split(r'[.!?]+', long_description_hu)
+        if sentences and len(sentences) > 0:
+            first_sentence = sentences[0].strip()
+            if len(first_sentence) > 200:
+                return first_sentence[:197] + "..."
+            else:
+                return first_sentence + "."
+        else:
+            return long_description_hu[:150] + "..."
 
 def create_access_token(user_id: str, email: str):
     """Create JWT access token"""
