@@ -1053,51 +1053,6 @@ function AppContent() {
               <p><span className="font-medium">{t('returnDate')}:</span> {formatDate(game.return_date)}</p>
             </div>
           )}
-
-          {/* Akció gombok */}
-          <div className="flex gap-2">
-            {game.status === 'available' ? (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setBorrowModal({ show: true, game });
-                }}
-                className="flex-1 bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-              >
-                {t('lendGame')}
-              </button>
-            ) : (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  returnGame(game.id);
-                }}
-                className="flex-1 bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
-              >
-                {t('markReturned')}
-              </button>
-            )}
-            
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setEditModal({ show: true, game });
-              }}
-              className="px-3 py-2 border border-blue-300 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors"
-            >
-              📝
-            </button>
-
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                deleteGame(game.id, displayTitle);
-              }}
-              className="px-3 py-2 border border-red-300 text-red-600 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors"
-            >
-              🗑️
-            </button>
-          </div>
         </div>
       </div>
     );
