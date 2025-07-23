@@ -802,6 +802,9 @@ function AppContent() {
   );
 
   const GameCard = ({ game }) => {
+    const [ownersExpanded, setOwnersExpanded] = useState(false);
+    const [showActionMenu, setShowActionMenu] = useState(false);
+    
     const getLanguageFlag = (lang) => {
       switch (lang) {
         case 'hu': return '🇭🇺';
@@ -813,6 +816,16 @@ function AppContent() {
 
     const displayTitle = language === 'hu' && game.title_hu ? game.title_hu : game.title;
     const displayShortDesc = language === 'hu' && game.description_short_hu ? game.description_short_hu : game.description_short;
+    
+    const userOwnsThis = game.owners && game.owners.some(owner => owner.user_id === user?.id);
+    
+    const handleOwnershipToggle = () => {
+      if (userOwnsThis) {
+        removeFromMyCollection(game.id);
+      } else {
+        addToMyCollection(game.id);
+      }
+    };
 
     return (
       <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
