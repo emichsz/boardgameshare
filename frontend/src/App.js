@@ -377,6 +377,7 @@ function AppContent() {
       const params = new URLSearchParams();
       if (status) params.append('status', status);
       if (searchFilter) params.append('search', searchFilter);
+      if (myGamesOnly) params.append('my_games_only', 'true');
       
       const response = await axios.get(`${API_BASE_URL}/api/games?${params.toString()}`);
       let filteredGames = response.data;
