@@ -434,18 +434,6 @@ function AppContent() {
   const [detailsModal, setDetailsModal] = useState({ show: false, game: null });
   const [editModal, setEditModal] = useState({ show: false, game: null });
   const [showFilters, setShowFilters] = useState(false);
-  const [advancedFilters, setAdvancedFilters] = useState({
-    minPlayers: '',
-    maxPlayers: '',
-    minTime: '',
-    maxTime: '',
-    minComplexity: '',
-    maxComplexity: '',
-    minYear: '',
-    maxYear: '',
-    category: '',
-    designer: ''
-  });
   const [sortBy, setSortBy] = useState('rating'); // 'rating', 'alphabetical', 'playtime'
   const [sortOrder, setSortOrder] = useState('desc'); // 'asc', 'desc'
   const [myGamesOnly, setMyGamesOnly] = useState(false); // false = minden játék, true = csak saját
