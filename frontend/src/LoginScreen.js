@@ -102,7 +102,7 @@ export default function LoginScreen() {
             )}
             
             {/* Google Sign In Button */}
-            <div className="flex justify-center">
+            <div className="flex justify-center mb-4">
               <GoogleLogin
                 onSuccess={handleGoogleLoginSuccess}
                 onError={handleGoogleLoginError}
@@ -112,6 +112,17 @@ export default function LoginScreen() {
                 width="300"
                 locale={language}
               />
+            </div>
+            
+            {/* Test User Login Button - For Testing Only */}
+            <div className="text-center">
+              <button
+                onClick={handleTestLogin}
+                className="text-sm text-gray-500 hover:text-gray-700 underline transition-colors"
+                title="Test user login for automated testing"
+              >
+                🧪 Test Login (admin42)
+              </button>
             </div>
           </div>
 
