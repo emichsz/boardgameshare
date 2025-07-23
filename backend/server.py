@@ -72,6 +72,12 @@ class GameSearch(BaseModel):
     year: Optional[str] = None
     thumbnail: Optional[str] = None
 
+class GameOwner(BaseModel):
+    user_id: str
+    user_name: str
+    added_date: datetime = Field(default_factory=datetime.now)
+    personal_notes: Optional[str] = None  # Saját megjegyzések
+
 class GameDetails(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     bgg_id: str
@@ -92,14 +98,16 @@ class GameDetails(BaseModel):
     description_short: str = ""  # Rövid leírás (1 mondatos)
     description_hu: Optional[str] = None  # Magyar hosszú leírás
     description_short_hu: Optional[str] = None  # Magyar rövid leírás
-    personal_notes: Optional[str] = None  # Saját megjegyzések
     language: str = "en"  # Játék nyelve: hu, en, multilang
     status: str = "available"  # available, borrowed
     borrowed_by: Optional[str] = None
     borrowed_date: Optional[datetime] = None
     return_date: Optional[datetime] = None
-    owner_id: Optional[str] = None  # Ki birtokolja ezt a játékot
-    owner_name: Optional[str] = None  # Birtokos neve
+    owners: List[GameOwner] = []  # Lista a tulajdonosokról
+    # Backwards compatibility mezők
+    owner_id: Optional[str] = None  # DEPRECATED - backwards compatibility
+    owner_name: Optional[str] = None  # DEPRECATED - backwards compatibility
+    personal_notes: Optional[str] = None  # DEPRECATED - backwards compatibility
 
 class User(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
