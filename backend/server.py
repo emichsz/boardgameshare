@@ -470,17 +470,43 @@ async def get_game_details(bgg_id: str):
         minage_elem = item.find(".//minage")
         min_age = int(minage_elem.get("value", 0)) if minage_elem is not None else 0
         
-        # Process description for short version (first sentence)
+        # Process description for short version (smart extraction)
         full_description = clean_html(desc_elem.text if desc_elem is not None else "")
         short_description = ""
         if full_description:
-            # Extract first sentence (up to first period, exclamation or question mark)
+            # Try to extract a meaningful short description
             import re
+            
+            # Method 1: Look for first paragraph (up to double newline)
+            paragraphs = re.split(r'\n\s*\n', full_description)
+            first_paragraph = paragraphs[0].strip() if paragraphs else ""
+            
+            # Method 2: Extract first 1-2 sentences
             sentences = re.split(r'[.!?]+', full_description)
-            if sentences:
-                short_description = sentences[0].strip() + "."
-                if len(short_description) > 200:  # Limit to 200 chars
-                    short_description = short_description[:200] + "..."
+            first_sentence = sentences[0].strip() if sentences else ""
+            second_sentence = sentences[1].strip() if len(sentences) > 1 else ""
+            
+            # Choose the best short description
+            if first_paragraph and len(first_paragraph) <= 250 and len(first_paragraph) >= 50:
+                # Use first paragraph if it's a good length
+                short_description = first_paragraph
+                if not short_description.endswith(('.', '!', '?')):
+                    short_description += "."
+            elif first_sentence and len(first_sentence) >= 30:
+                # Use first sentence, possibly with second if short
+                if len(first_sentence) < 100 and second_sentence and len(second_sentence) < 100:
+                    short_description = f"{first_sentence}. {second_sentence}."
+                else:
+                    short_description = first_sentence + "."
+            else:
+                # Fallback: take first 200 characters
+                short_description = full_description[:200].strip()
+                if not short_description.endswith(('.', '!', '?')):
+                    short_description += "..."
+            
+            # Final length check
+            if len(short_description) > 300:
+                short_description = short_description[:297] + "..."
         
         game_details = GameDetails(
             bgg_id=bgg_id,
