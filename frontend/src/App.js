@@ -305,8 +305,6 @@ const translations = {
     
     // Advanced filters
     advancedFilters: 'Advanced Filters',
-    showFilters: 'Show Filters',
-    hideFilters: 'Hide Filters',
     
     // Owners
     owners: 'Owners',
