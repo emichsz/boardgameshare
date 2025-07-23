@@ -523,14 +523,27 @@ function AppContent() {
     try {
       await axios.post(`${API_BASE_URL}/api/games/${gameId}/add-to-my-collection`);
       await fetchGames(); // Frissítsük a listát
-      alert(t('gameAddedToCollection') || 'Játék hozzáadva a gyűjteményhez!');
+      // Nincs alert - silent hozzáadás
     } catch (error) {
       console.error('Error adding to collection:', error);
       if (error.response?.status === 409) {
-        alert(t('alreadyOwned') || 'Ez a játék már a tiéd!');
+        // Már birtokolja - silent, csak frissítés
+        await fetchGames();
       } else {
         alert('Hiba történt a hozzáadáskor: ' + (error.response?.data?.detail || error.message));
       }
+    }
+  };
+
+  // Remove game from user's collection
+  const removeFromMyCollection = async (gameId) => {
+    try {
+      await axios.delete(`${API_BASE_URL}/api/games/${gameId}`);
+      await fetchGames(); // Frissítsük a listát
+      // Nincs alert - silent eltávolítás
+    } catch (error) {
+      console.error('Error removing from collection:', error);
+      alert('Hiba történt az eltávolításkor: ' + (error.response?.data?.detail || error.message));
     }
   };
 
