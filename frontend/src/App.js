@@ -1545,9 +1545,9 @@ function AppContent() {
         <div className="mb-8 flex flex-col sm:flex-row gap-4">
           <div className="flex gap-2">
             <button
-              onClick={() => setFilter('all')}
+              onClick={() => setMyGamesOnly(false)}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                filter === 'all'
+                !myGamesOnly
                   ? 'bg-blue-600 text-white'
                   : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
               }`}
@@ -1555,10 +1555,23 @@ function AppContent() {
               {t('allGames')} ({games.length})
             </button>
             <button
-              onClick={() => setFilter('available')}
+              onClick={() => setMyGamesOnly(true)}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                filter === 'available'
+                myGamesOnly
                   ? 'bg-blue-600 text-white'
+                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              {t('myGames')}
+            </button>
+          </div>
+          
+          <div className="flex gap-2">
+            <button
+              onClick={() => setFilter('all')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                filter === 'all'
+                  ? 'bg-green-600 text-white'
                   : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
               }`}
             >
@@ -1568,7 +1581,7 @@ function AppContent() {
               onClick={() => setFilter('borrowed')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 filter === 'borrowed'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-green-600 text-white'
                   : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
               }`}
             >
