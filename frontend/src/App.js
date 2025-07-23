@@ -449,6 +449,8 @@ function AppContent() {
   const [sortBy, setSortBy] = useState('rating'); // 'rating', 'alphabetical', 'playtime'
   const [sortOrder, setSortOrder] = useState('desc'); // 'asc', 'desc'
   const [myGamesOnly, setMyGamesOnly] = useState(false); // false = minden játék, true = csak saját
+  const [allGamesCount, setAllGamesCount] = useState(0); // Összes játék száma
+  const [myGamesCount, setMyGamesCount] = useState(0); // Saját játékok száma
   const [newFilters, setNewFilters] = useState({
     players: [], // ['1', '2', '3-4', '5+']
     duration: [], // ['0-30', '30-60', '60-120', '120+']
