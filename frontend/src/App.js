@@ -726,9 +726,6 @@ function AppContent() {
         description_short_hu: decodeHtmlEntities(game.description_short_hu)
       }));
       
-      // Új szűrők alkalmazása
-      filteredGames = applyNewFilters(filteredGames);
-      
       // Sorrendezés
       filteredGames.sort((a, b) => {
         let compareValue = 0;
