@@ -1357,6 +1357,527 @@ class BoardGameAPITester:
         
         return passed == total
 
+    def test_enhanced_filtering_system(self):
+        """Test the newly implemented enhanced filtering system"""
+        print("\n🔍 Testing Enhanced Filtering System...")
+        
+        # First authenticate to access protected endpoints
+        auth_token = self.authenticate_test_user()
+        if not auth_token:
+            self.log_test("Enhanced Filtering - Authentication", False, "Failed to authenticate test user")
+            return False
+        
+        # Test 1: Player Count Filtering
+        self.test_player_count_filtering(auth_token)
+        
+        # Test 2: Playtime Filtering
+        self.test_playtime_filtering(auth_token)
+        
+        # Test 3: Age Filtering
+        self.test_age_filtering(auth_token)
+        
+        # Test 4: Rating Filtering
+        self.test_rating_filtering(auth_token)
+        
+        # Test 5: Game Type Filtering
+        self.test_game_type_filtering(auth_token)
+        
+        # Test 6: Mood Filtering
+        self.test_mood_filtering(auth_token)
+        
+        # Test 7: Combined Filtering
+        self.test_combined_filtering(auth_token)
+        
+        # Test 8: Edge Cases
+        self.test_filtering_edge_cases(auth_token)
+        
+        return True
+
+    def authenticate_test_user(self):
+        """Authenticate using admin42 test user"""
+        try:
+            response = self.session.post(f"{API_BASE}/auth/test-user")
+            
+            if response.status_code == 200:
+                auth_data = response.json()
+                token = auth_data.get('access_token')
+                if token:
+                    # Set authorization header for subsequent requests
+                    self.session.headers.update({'Authorization': f'Bearer {token}'})
+                    self.log_test("Enhanced Filtering - Authentication", True, 
+                                f"Successfully authenticated as {auth_data.get('user', {}).get('name', 'admin42')}")
+                    return token
+                else:
+                    self.log_test("Enhanced Filtering - Authentication", False, "No access token in response", auth_data)
+                    return None
+            else:
+                self.log_test("Enhanced Filtering - Authentication", False, f"HTTP {response.status_code}", response.text)
+                return None
+                
+        except Exception as e:
+            self.log_test("Enhanced Filtering - Authentication", False, f"Exception: {str(e)}")
+            return None
+
+    def test_player_count_filtering(self, auth_token):
+        """Test min_players and max_players filtering parameters"""
+        print("\n   Testing Player Count Filtering...")
+        
+        try:
+            # Test min_players filter
+            response = self.session.get(f"{API_BASE}/games?min_players=2")
+            if response.status_code == 200:
+                games = response.json()
+                # Check that all games support at least 2 players (max_players >= 2)
+                valid_games = [game for game in games if game.get('max_players', 0) >= 2]
+                if len(valid_games) == len(games):
+                    self.log_test("Player Count Filter - min_players=2", True, 
+                                f"Found {len(games)} games that support 2+ players")
+                else:
+                    self.log_test("Player Count Filter - min_players=2", False, 
+                                f"Some games don't meet min_players=2 criteria: {len(games) - len(valid_games)} invalid")
+            else:
+                self.log_test("Player Count Filter - min_players=2", False, f"HTTP {response.status_code}", response.text)
+
+            # Test max_players filter
+            response = self.session.get(f"{API_BASE}/games?max_players=4")
+            if response.status_code == 200:
+                games = response.json()
+                # Check that all games can be played with 4 or fewer players (min_players <= 4)
+                valid_games = [game for game in games if game.get('min_players', 999) <= 4]
+                if len(valid_games) == len(games):
+                    self.log_test("Player Count Filter - max_players=4", True, 
+                                f"Found {len(games)} games playable with 4 or fewer players")
+                else:
+                    self.log_test("Player Count Filter - max_players=4", False, 
+                                f"Some games don't meet max_players=4 criteria: {len(games) - len(valid_games)} invalid")
+            else:
+                self.log_test("Player Count Filter - max_players=4", False, f"HTTP {response.status_code}", response.text)
+
+            # Test combined min and max players
+            response = self.session.get(f"{API_BASE}/games?min_players=2&max_players=4")
+            if response.status_code == 200:
+                games = response.json()
+                # Check that all games support 2-4 players
+                valid_games = [game for game in games if game.get('min_players', 999) <= 4 and game.get('max_players', 0) >= 2]
+                if len(valid_games) == len(games):
+                    self.log_test("Player Count Filter - Combined 2-4 players", True, 
+                                f"Found {len(games)} games for 2-4 players")
+                else:
+                    self.log_test("Player Count Filter - Combined 2-4 players", False, 
+                                f"Some games don't meet 2-4 player criteria: {len(games) - len(valid_games)} invalid")
+            else:
+                self.log_test("Player Count Filter - Combined 2-4 players", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("Player Count Filtering", False, f"Exception: {str(e)}")
+
+    def test_playtime_filtering(self, auth_token):
+        """Test min_playtime and max_playtime filtering parameters"""
+        print("\n   Testing Playtime Filtering...")
+        
+        try:
+            # Test min_playtime filter
+            response = self.session.get(f"{API_BASE}/games?min_playtime=30")
+            if response.status_code == 200:
+                games = response.json()
+                # Check that all games have playtime >= 30 minutes
+                valid_games = [game for game in games if game.get('play_time', 0) >= 30]
+                if len(valid_games) == len(games):
+                    self.log_test("Playtime Filter - min_playtime=30", True, 
+                                f"Found {len(games)} games with 30+ minute playtime")
+                else:
+                    self.log_test("Playtime Filter - min_playtime=30", False, 
+                                f"Some games don't meet min_playtime=30 criteria: {len(games) - len(valid_games)} invalid")
+            else:
+                self.log_test("Playtime Filter - min_playtime=30", False, f"HTTP {response.status_code}", response.text)
+
+            # Test max_playtime filter
+            response = self.session.get(f"{API_BASE}/games?max_playtime=90")
+            if response.status_code == 200:
+                games = response.json()
+                # Check that all games have playtime <= 90 minutes
+                valid_games = [game for game in games if game.get('play_time', 999) <= 90]
+                if len(valid_games) == len(games):
+                    self.log_test("Playtime Filter - max_playtime=90", True, 
+                                f"Found {len(games)} games with 90 minute or less playtime")
+                else:
+                    self.log_test("Playtime Filter - max_playtime=90", False, 
+                                f"Some games don't meet max_playtime=90 criteria: {len(games) - len(valid_games)} invalid")
+            else:
+                self.log_test("Playtime Filter - max_playtime=90", False, f"HTTP {response.status_code}", response.text)
+
+            # Test combined playtime range
+            response = self.session.get(f"{API_BASE}/games?min_playtime=30&max_playtime=90")
+            if response.status_code == 200:
+                games = response.json()
+                # Check that all games have playtime between 30-90 minutes
+                valid_games = [game for game in games if 30 <= game.get('play_time', 0) <= 90]
+                if len(valid_games) == len(games):
+                    self.log_test("Playtime Filter - Combined 30-90 minutes", True, 
+                                f"Found {len(games)} games with 30-90 minute playtime")
+                else:
+                    self.log_test("Playtime Filter - Combined 30-90 minutes", False, 
+                                f"Some games don't meet 30-90 minute criteria: {len(games) - len(valid_games)} invalid")
+            else:
+                self.log_test("Playtime Filter - Combined 30-90 minutes", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("Playtime Filtering", False, f"Exception: {str(e)}")
+
+    def test_age_filtering(self, auth_token):
+        """Test min_age filtering parameter"""
+        print("\n   Testing Age Filtering...")
+        
+        try:
+            # Test min_age filter
+            response = self.session.get(f"{API_BASE}/games?min_age=10")
+            if response.status_code == 200:
+                games = response.json()
+                # Check that all games have min_age >= 10
+                valid_games = [game for game in games if game.get('min_age', 0) >= 10]
+                if len(valid_games) == len(games):
+                    self.log_test("Age Filter - min_age=10", True, 
+                                f"Found {len(games)} games suitable for ages 10+")
+                else:
+                    self.log_test("Age Filter - min_age=10", False, 
+                                f"Some games don't meet min_age=10 criteria: {len(games) - len(valid_games)} invalid")
+            else:
+                self.log_test("Age Filter - min_age=10", False, f"HTTP {response.status_code}", response.text)
+
+            # Test with different age threshold
+            response = self.session.get(f"{API_BASE}/games?min_age=14")
+            if response.status_code == 200:
+                games = response.json()
+                # Check that all games have min_age >= 14
+                valid_games = [game for game in games if game.get('min_age', 0) >= 14]
+                if len(valid_games) == len(games):
+                    self.log_test("Age Filter - min_age=14", True, 
+                                f"Found {len(games)} games suitable for ages 14+")
+                else:
+                    self.log_test("Age Filter - min_age=14", False, 
+                                f"Some games don't meet min_age=14 criteria: {len(games) - len(valid_games)} invalid")
+            else:
+                self.log_test("Age Filter - min_age=14", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("Age Filtering", False, f"Exception: {str(e)}")
+
+    def test_rating_filtering(self, auth_token):
+        """Test min_rating and max_rating filtering parameters"""
+        print("\n   Testing Rating Filtering...")
+        
+        try:
+            # Test min_rating filter
+            response = self.session.get(f"{API_BASE}/games?min_rating=7.0")
+            if response.status_code == 200:
+                games = response.json()
+                # Check that all games have bgg_rating >= 7.0
+                valid_games = [game for game in games if game.get('bgg_rating', 0) >= 7.0]
+                if len(valid_games) == len(games):
+                    self.log_test("Rating Filter - min_rating=7.0", True, 
+                                f"Found {len(games)} games with rating 7.0+")
+                else:
+                    self.log_test("Rating Filter - min_rating=7.0", False, 
+                                f"Some games don't meet min_rating=7.0 criteria: {len(games) - len(valid_games)} invalid")
+            else:
+                self.log_test("Rating Filter - min_rating=7.0", False, f"HTTP {response.status_code}", response.text)
+
+            # Test max_rating filter
+            response = self.session.get(f"{API_BASE}/games?max_rating=8.5")
+            if response.status_code == 200:
+                games = response.json()
+                # Check that all games have bgg_rating <= 8.5
+                valid_games = [game for game in games if game.get('bgg_rating', 10) <= 8.5]
+                if len(valid_games) == len(games):
+                    self.log_test("Rating Filter - max_rating=8.5", True, 
+                                f"Found {len(games)} games with rating 8.5 or less")
+                else:
+                    self.log_test("Rating Filter - max_rating=8.5", False, 
+                                f"Some games don't meet max_rating=8.5 criteria: {len(games) - len(valid_games)} invalid")
+            else:
+                self.log_test("Rating Filter - max_rating=8.5", False, f"HTTP {response.status_code}", response.text)
+
+            # Test combined rating range
+            response = self.session.get(f"{API_BASE}/games?min_rating=6.0&max_rating=8.0")
+            if response.status_code == 200:
+                games = response.json()
+                # Check that all games have rating between 6.0-8.0
+                valid_games = [game for game in games if 6.0 <= game.get('bgg_rating', 0) <= 8.0]
+                if len(valid_games) == len(games):
+                    self.log_test("Rating Filter - Combined 6.0-8.0", True, 
+                                f"Found {len(games)} games with rating 6.0-8.0")
+                else:
+                    self.log_test("Rating Filter - Combined 6.0-8.0", False, 
+                                f"Some games don't meet 6.0-8.0 rating criteria: {len(games) - len(valid_games)} invalid")
+            else:
+                self.log_test("Rating Filter - Combined 6.0-8.0", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("Rating Filtering", False, f"Exception: {str(e)}")
+
+    def test_game_type_filtering(self, auth_token):
+        """Test types parameter with comma-separated values"""
+        print("\n   Testing Game Type Filtering...")
+        
+        try:
+            # Test single type filter
+            response = self.session.get(f"{API_BASE}/games?types=strategic")
+            if response.status_code == 200:
+                games = response.json()
+                self.log_test("Type Filter - strategic", True, 
+                            f"Found {len(games)} strategic games")
+            else:
+                self.log_test("Type Filter - strategic", False, f"HTTP {response.status_code}", response.text)
+
+            # Test multiple types filter
+            response = self.session.get(f"{API_BASE}/games?types=strategic,party")
+            if response.status_code == 200:
+                games = response.json()
+                self.log_test("Type Filter - strategic,party", True, 
+                            f"Found {len(games)} strategic or party games")
+            else:
+                self.log_test("Type Filter - strategic,party", False, f"HTTP {response.status_code}", response.text)
+
+            # Test family type
+            response = self.session.get(f"{API_BASE}/games?types=family")
+            if response.status_code == 200:
+                games = response.json()
+                self.log_test("Type Filter - family", True, 
+                            f"Found {len(games)} family games")
+            else:
+                self.log_test("Type Filter - family", False, f"HTTP {response.status_code}", response.text)
+
+            # Test cooperative type
+            response = self.session.get(f"{API_BASE}/games?types=cooperative")
+            if response.status_code == 200:
+                games = response.json()
+                self.log_test("Type Filter - cooperative", True, 
+                            f"Found {len(games)} cooperative games")
+            else:
+                self.log_test("Type Filter - cooperative", False, f"HTTP {response.status_code}", response.text)
+
+            # Test educational and children types
+            response = self.session.get(f"{API_BASE}/games?types=educational,children")
+            if response.status_code == 200:
+                games = response.json()
+                self.log_test("Type Filter - educational,children", True, 
+                            f"Found {len(games)} educational or children games")
+            else:
+                self.log_test("Type Filter - educational,children", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("Game Type Filtering", False, f"Exception: {str(e)}")
+
+    def test_mood_filtering(self, auth_token):
+        """Test moods parameter with comma-separated values"""
+        print("\n   Testing Mood Filtering...")
+        
+        try:
+            # Test single mood filter
+            response = self.session.get(f"{API_BASE}/games?moods=thinking")
+            if response.status_code == 200:
+                games = response.json()
+                self.log_test("Mood Filter - thinking", True, 
+                            f"Found {len(games)} thinking games")
+            else:
+                self.log_test("Mood Filter - thinking", False, f"HTTP {response.status_code}", response.text)
+
+            # Test multiple moods filter
+            response = self.session.get(f"{API_BASE}/games?moods=thinking,competitive")
+            if response.status_code == 200:
+                games = response.json()
+                self.log_test("Mood Filter - thinking,competitive", True, 
+                            f"Found {len(games)} thinking or competitive games")
+            else:
+                self.log_test("Mood Filter - thinking,competitive", False, f"HTTP {response.status_code}", response.text)
+
+            # Test light mood
+            response = self.session.get(f"{API_BASE}/games?moods=light")
+            if response.status_code == 200:
+                games = response.json()
+                self.log_test("Mood Filter - light", True, 
+                            f"Found {len(games)} light games")
+            else:
+                self.log_test("Mood Filter - light", False, f"HTTP {response.status_code}", response.text)
+
+            # Test humorous mood
+            response = self.session.get(f"{API_BASE}/games?moods=humorous")
+            if response.status_code == 200:
+                games = response.json()
+                self.log_test("Mood Filter - humorous", True, 
+                            f"Found {len(games)} humorous games")
+            else:
+                self.log_test("Mood Filter - humorous", False, f"HTTP {response.status_code}", response.text)
+
+            # Test creative and narrative moods
+            response = self.session.get(f"{API_BASE}/games?moods=creative,narrative")
+            if response.status_code == 200:
+                games = response.json()
+                self.log_test("Mood Filter - creative,narrative", True, 
+                            f"Found {len(games)} creative or narrative games")
+            else:
+                self.log_test("Mood Filter - creative,narrative", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("Mood Filtering", False, f"Exception: {str(e)}")
+
+    def test_combined_filtering(self, auth_token):
+        """Test combination of multiple filters"""
+        print("\n   Testing Combined Filtering...")
+        
+        try:
+            # Test combination of player count, type, and rating
+            response = self.session.get(f"{API_BASE}/games?min_players=3&types=strategic&min_rating=6.0")
+            if response.status_code == 200:
+                games = response.json()
+                # Validate that games meet all criteria
+                valid_games = []
+                for game in games:
+                    meets_players = game.get('max_players', 0) >= 3
+                    meets_rating = game.get('bgg_rating', 0) >= 6.0
+                    # Type validation would require checking categorization function
+                    if meets_players and meets_rating:
+                        valid_games.append(game)
+                
+                if len(valid_games) == len(games):
+                    self.log_test("Combined Filter - players+type+rating", True, 
+                                f"Found {len(games)} games meeting all criteria (3+ players, strategic, 6.0+ rating)")
+                else:
+                    self.log_test("Combined Filter - players+type+rating", False, 
+                                f"Some games don't meet combined criteria: {len(games) - len(valid_games)} invalid")
+            else:
+                self.log_test("Combined Filter - players+type+rating", False, f"HTTP {response.status_code}", response.text)
+
+            # Test combination of playtime, mood, and age
+            response = self.session.get(f"{API_BASE}/games?min_playtime=45&max_playtime=120&moods=competitive&min_age=12")
+            if response.status_code == 200:
+                games = response.json()
+                # Validate playtime and age criteria
+                valid_games = []
+                for game in games:
+                    meets_playtime = 45 <= game.get('play_time', 0) <= 120
+                    meets_age = game.get('min_age', 0) >= 12
+                    if meets_playtime and meets_age:
+                        valid_games.append(game)
+                
+                if len(valid_games) == len(games):
+                    self.log_test("Combined Filter - playtime+mood+age", True, 
+                                f"Found {len(games)} games meeting all criteria (45-120min, competitive, 12+ age)")
+                else:
+                    self.log_test("Combined Filter - playtime+mood+age", False, 
+                                f"Some games don't meet combined criteria: {len(games) - len(valid_games)} invalid")
+            else:
+                self.log_test("Combined Filter - playtime+mood+age", False, f"HTTP {response.status_code}", response.text)
+
+            # Test with existing functionality (search + enhanced filters)
+            response = self.session.get(f"{API_BASE}/games?search=war&min_players=2&max_players=4&types=strategic")
+            if response.status_code == 200:
+                games = response.json()
+                self.log_test("Combined Filter - search+enhanced", True, 
+                            f"Found {len(games)} games matching search 'war' with enhanced filters")
+            else:
+                self.log_test("Combined Filter - search+enhanced", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("Combined Filtering", False, f"Exception: {str(e)}")
+
+    def test_filtering_edge_cases(self, auth_token):
+        """Test edge cases like no games matching filters"""
+        print("\n   Testing Filtering Edge Cases...")
+        
+        try:
+            # Test with very restrictive filters that should return no results
+            response = self.session.get(f"{API_BASE}/games?min_players=10&max_players=2")  # Impossible condition
+            if response.status_code == 200:
+                games = response.json()
+                if len(games) == 0:
+                    self.log_test("Edge Case - Impossible player range", True, 
+                                "Correctly returned 0 games for impossible player range (min > max)")
+                else:
+                    self.log_test("Edge Case - Impossible player range", False, 
+                                f"Expected 0 games but got {len(games)} for impossible criteria")
+            else:
+                self.log_test("Edge Case - Impossible player range", False, f"HTTP {response.status_code}", response.text)
+
+            # Test with very high rating filter
+            response = self.session.get(f"{API_BASE}/games?min_rating=9.5")
+            if response.status_code == 200:
+                games = response.json()
+                self.log_test("Edge Case - Very high rating", True, 
+                            f"Found {len(games)} games with rating 9.5+ (may be 0)")
+            else:
+                self.log_test("Edge Case - Very high rating", False, f"HTTP {response.status_code}", response.text)
+
+            # Test with non-existent type
+            response = self.session.get(f"{API_BASE}/games?types=nonexistent")
+            if response.status_code == 200:
+                games = response.json()
+                self.log_test("Edge Case - Non-existent type", True, 
+                            f"Handled non-existent type gracefully, returned {len(games)} games")
+            else:
+                self.log_test("Edge Case - Non-existent type", False, f"HTTP {response.status_code}", response.text)
+
+            # Test with empty type/mood values
+            response = self.session.get(f"{API_BASE}/games?types=&moods=")
+            if response.status_code == 200:
+                games = response.json()
+                self.log_test("Edge Case - Empty type/mood", True, 
+                            f"Handled empty type/mood parameters gracefully, returned {len(games)} games")
+            else:
+                self.log_test("Edge Case - Empty type/mood", False, f"HTTP {response.status_code}", response.text)
+
+            # Test existing functionality still works
+            response = self.session.get(f"{API_BASE}/games?status=available")
+            if response.status_code == 200:
+                games = response.json()
+                self.log_test("Edge Case - Existing status filter", True, 
+                            f"Existing status filter still works, found {len(games)} available games")
+            else:
+                self.log_test("Edge Case - Existing status filter", False, f"HTTP {response.status_code}", response.text)
+
+            # Test my_games_only still works with enhanced filters
+            response = self.session.get(f"{API_BASE}/games?my_games_only=true&min_players=2")
+            if response.status_code == 200:
+                games = response.json()
+                self.log_test("Edge Case - my_games_only + enhanced", True, 
+                            f"my_games_only works with enhanced filters, found {len(games)} games")
+            else:
+                self.log_test("Edge Case - my_games_only + enhanced", False, f"HTTP {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_test("Filtering Edge Cases", False, f"Exception: {str(e)}")
+
+    def run_enhanced_filtering_tests(self):
+        """Run enhanced filtering system tests"""
+        print("🔍 Starting Enhanced Filtering System Tests")
+        print("=" * 60)
+        
+        # 1. Backend Stability Check
+        self.test_backend_stability()
+        
+        # 2. Enhanced Filtering Tests
+        self.test_enhanced_filtering_system()
+        
+        # 3. Summary
+        print("\n📊 Enhanced Filtering Test Summary")
+        print("=" * 60)
+        
+        passed = sum(1 for result in self.test_results if result['success'])
+        total = len(self.test_results)
+        
+        print(f"Tests Passed: {passed}/{total}")
+        print(f"Success Rate: {(passed/total)*100:.1f}%")
+        
+        if passed < total:
+            print("\n❌ Failed Tests:")
+            for result in self.test_results:
+                if not result['success']:
+                    print(f"   - {result['test']}: {result['details']}")
+        else:
+            print("\n✅ All enhanced filtering tests passed!")
+        
+        return passed == total
+
     def cleanup_test_games(self):
         """Clean up games added during testing"""
         print("\n🧹 Cleaning up test games...")
