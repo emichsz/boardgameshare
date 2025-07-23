@@ -195,6 +195,52 @@ const translations = {
     available: 'Available',
     borrowed: 'Borrowed',
     searchCollection: 'Search your collection...',
+    showFilters: 'Show Filters',
+    hideFilters: 'Hide Filters',
+    
+    // New filters
+    filterPlayers: 'Player Count',
+    filterDuration: 'Duration',
+    filterAge: 'Recommended Age',
+    filterType: 'Game Type',
+    filterMood: 'Game Mood',
+    filterRating: 'Rating',
+    
+    // Player count filter
+    players1: '1 Player',
+    players2: '2 Players',
+    players3to4: '3-4 Players',
+    players5plus: '5+ Players',
+    
+    // Duration filter
+    duration0to30: '0-30 minutes',
+    duration30to60: '30-60 minutes',
+    duration60to120: '60-120 minutes',
+    duration120plus: '120+ minutes',
+    
+    // Age categories
+    age3plus: '3+',
+    age6plus: '6+',
+    age10plus: '10+',
+    age14plus: '14+',
+    age18plus: '18+',
+    
+    // Game types
+    typeParty: 'Party',
+    typeStrategic: 'Strategic',
+    typeFamily: 'Family',
+    typeCooperative: 'Cooperative',
+    typeEducational: 'Educational',
+    typeChildren: 'Children',
+    typeSolo: 'Solo',
+    
+    // Mood/style
+    moodLight: 'Light',
+    moodHumorous: 'Humorous',
+    moodThinking: 'Thinking',
+    moodCompetitive: 'Competitive',
+    moodCreative: 'Creative',
+    moodNarrative: 'Narrative',
     
     // Empty state
     noGamesYet: 'No games in your collection yet',
