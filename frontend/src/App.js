@@ -433,7 +433,7 @@ function AppContent() {
   const [viewMode, setViewMode] = useState('grid'); // 'grid' vagy 'list'
   const [detailsModal, setDetailsModal] = useState({ show: false, game: null });
   const [editModal, setEditModal] = useState({ show: false, game: null });
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const [advancedFilters, setAdvancedFilters] = useState({
     minPlayers: '',
     maxPlayers: '',
