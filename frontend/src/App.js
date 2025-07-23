@@ -147,6 +147,7 @@ const translations = {
     
     // Filters
     allGames: 'All Games',
+    myGames: 'My Games',
     available: 'Available',
     borrowed: 'Borrowed',
     searchCollection: 'Search your collection...',
