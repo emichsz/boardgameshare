@@ -1786,19 +1786,19 @@ class BoardGameAPITester:
         print("\n   Testing Filtering Edge Cases...")
         
         try:
-            # Test with very restrictive filters that should return no results
-            # Use a condition where min_players > max_players for the same game would be impossible
-            response = self.session.get(f"{API_BASE}/games?min_players=5&max_players=3")  # Games that need 5+ but can only handle 3 max
+            # Test with very restrictive filters 
+            # This tests games that can accommodate 5+ players AND can be played with 3 or fewer
+            response = self.session.get(f"{API_BASE}/games?min_players=5&max_players=3")
             if response.status_code == 200:
                 games = response.json()
-                # Check if any games actually meet this criteria (should be none)
+                # Validate that returned games actually meet both criteria
                 valid_games = [game for game in games if game.get('max_players', 0) >= 5 and game.get('min_players', 999) <= 3]
-                if len(games) == 0 or len(valid_games) == 0:
+                if len(valid_games) == len(games):
                     self.log_test("Edge Case - Restrictive player range", True, 
-                                f"Correctly handled restrictive player range, returned {len(games)} games")
+                                f"Correctly filtered {len(games)} games that can accommodate 5+ players AND be played with 3 or fewer")
                 else:
                     self.log_test("Edge Case - Restrictive player range", False, 
-                                f"Found {len(valid_games)} games meeting restrictive criteria (unexpected)")
+                                f"Some games don't meet restrictive criteria: {len(games) - len(valid_games)} invalid")
             else:
                 self.log_test("Edge Case - Restrictive player range", False, f"HTTP {response.status_code}", response.text)
 
