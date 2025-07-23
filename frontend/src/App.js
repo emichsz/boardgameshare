@@ -1223,16 +1223,30 @@ function AppContent() {
               </select>
             </div>
 
-            {/* Magyar leírás */}
+            {/* Magyar rövid leírás */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('hungarianDescription')} {t('optional')}
+                {t('hungarianShortDescription')} {t('optional')}
+              </label>
+              <textarea
+                value={editedGame.description_short_hu}
+                onChange={(e) => setEditedGame({...editedGame, description_short_hu: e.target.value})}
+                placeholder={editedGame.description_short ? editedGame.description_short : 'Rövid összefoglaló a játékról...'}
+                rows={2}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            {/* Magyar hosszú leírás */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('hungarianLongDescription')} {t('optional')}
               </label>
               <textarea
                 value={editedGame.description_hu}
                 onChange={(e) => setEditedGame({...editedGame, description_hu: e.target.value})}
-                placeholder={editedGame.description.substring(0, 100) + '...'}
-                rows={4}
+                placeholder={editedGame.description ? editedGame.description.substring(0, 100) + '...' : 'Részletes leírás a játékról...'}
+                rows={5}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
