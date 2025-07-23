@@ -2042,7 +2042,8 @@ function AppContent() {
         </div>
 
         {/* Advanced Filters */}
-        {showAdvancedFilters && <AdvancedFilters />}
+        {/* New Enhanced Filters */}
+        {showFilters && <EnhancedFilters />}
 
         {/* Games Display */}
         {games.length === 0 ? (
