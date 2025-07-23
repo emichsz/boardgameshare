@@ -984,6 +984,52 @@ async def get_collection(
         if category:
             games = [game for game in games if category.lower() in [cat.lower() for cat in game.categories]]
         
+        # Enhanced filtering
+        
+        # Player count filtering
+        if min_players is not None:
+            games = [game for game in games if game.max_players >= min_players]
+        if max_players is not None:
+            games = [game for game in games if game.min_players <= max_players]
+            
+        # Playtime filtering
+        if min_playtime is not None:
+            games = [game for game in games if game.play_time >= min_playtime]
+        if max_playtime is not None:
+            games = [game for game in games if game.play_time <= max_playtime]
+            
+        # Age filtering
+        if min_age is not None:
+            games = [game for game in games if game.min_age >= min_age]
+        if max_age is not None:
+            games = [game for game in games if game.min_age <= max_age]
+            
+        # Rating filtering
+        if min_rating is not None:
+            games = [game for game in games if game.bgg_rating >= min_rating]
+        if max_rating is not None:
+            games = [game for game in games if game.bgg_rating <= max_rating]
+            
+        # Game type filtering
+        if types:
+            type_list = [t.strip() for t in types.split(',')]
+            filtered_games = []
+            for game in games:
+                game_types = categorize_game_type(game.categories)
+                if any(game_type in game_types for game_type in type_list):
+                    filtered_games.append(game)
+            games = filtered_games
+            
+        # Mood filtering
+        if moods:
+            mood_list = [m.strip() for m in moods.split(',')]
+            filtered_games = []
+            for game in games:
+                game_moods = categorize_game_mood(game.categories)
+                if any(mood in game_moods for mood in mood_list):
+                    filtered_games.append(game)
+            games = filtered_games
+        
         return games
         
     except Exception as e:
