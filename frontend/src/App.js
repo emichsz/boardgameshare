@@ -857,170 +857,227 @@ function AppContent() {
     }
   };
 
-  const clearAdvancedFilters = () => {
-    setAdvancedFilters({
-      minPlayers: '',
-      maxPlayers: '',
-      minTime: '',
-      maxTime: '',
-      minComplexity: '',
-      maxComplexity: '',
-      minYear: '',
-      maxYear: '',
-      category: '',
-      designer: ''
-    });
-  };
-
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString(language === 'hu' ? 'hu-HU' : 'en-US');
   };
 
-  const AdvancedFilters = () => (
-    <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-medium text-gray-900">{t('advancedFilters')}</h3>
-        <button
-          onClick={clearAdvancedFilters}
-          className="text-sm text-blue-600 hover:text-blue-800"
-        >
-          {t('clearFilters')}
-        </button>
+  // Enhanced Filters Component
+  const EnhancedFilters = () => {
+    const handleFilterChange = (filterType, value, isChecked = null) => {
+      setNewFilters(prev => {
+        const newState = { ...prev };
+        
+        if (filterType === 'rating') {
+          newState.rating = value;
+        } else {
+          // Multi-select filters
+          if (isChecked === null) {
+            // Toggle
+            if (newState[filterType].includes(value)) {
+              newState[filterType] = newState[filterType].filter(item => item !== value);
+            } else {
+              newState[filterType] = [...newState[filterType], value];
+            }
+          } else if (isChecked) {
+            if (!newState[filterType].includes(value)) {
+              newState[filterType] = [...newState[filterType], value];
+            }
+          } else {
+            newState[filterType] = newState[filterType].filter(item => item !== value);
+          }
+        }
+        
+        return newState;
+      });
+    };
+
+    const clearAllFilters = () => {
+      setNewFilters({
+        players: [],
+        duration: [],
+        age: [],
+        type: [],
+        mood: [],
+        rating: [5, 10]
+      });
+    };
+
+    return (
+      <div className="mb-6 p-6 bg-gray-50 rounded-lg">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-medium text-gray-900">{t('showFilters')}</h3>
+          <button
+            onClick={clearAllFilters}
+            className="text-sm text-blue-600 hover:text-blue-800"
+          >
+            {t('clearFilters') || 'Szűrők törlése'}
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          
+          {/* Játékosok száma */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              {t('filterPlayers')}
+            </label>
+            <div className="space-y-2">
+              {[
+                { value: '1', label: t('players1') },
+                { value: '2', label: t('players2') },
+                { value: '3-4', label: t('players3to4') },
+                { value: '5+', label: t('players5plus') }
+              ].map(option => (
+                <label key={option.value} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={newFilters.players.includes(option.value)}
+                    onChange={(e) => handleFilterChange('players', option.value, e.target.checked)}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">{option.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Játékidő */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              {t('filterDuration')}
+            </label>
+            <div className="space-y-2">
+              {[
+                { value: '0-30', label: t('duration0to30') },
+                { value: '30-60', label: t('duration30to60') },
+                { value: '60-120', label: t('duration60to120') },
+                { value: '120+', label: t('duration120plus') }
+              ].map(option => (
+                <label key={option.value} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={newFilters.duration.includes(option.value)}
+                    onChange={(e) => handleFilterChange('duration', option.value, e.target.checked)}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">{option.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Ajánlott korosztály */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              {t('filterAge')}
+            </label>
+            <div className="space-y-2">
+              {[
+                { value: '3+', label: t('age3plus') },
+                { value: '6+', label: t('age6plus') },
+                { value: '10+', label: t('age10plus') },
+                { value: '14+', label: t('age14plus') },
+                { value: '18+', label: t('age18plus') }
+              ].map(option => (
+                <label key={option.value} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={newFilters.age.includes(option.value)}
+                    onChange={(e) => handleFilterChange('age', option.value, e.target.checked)}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">{option.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Játék típusa */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              {t('filterType')}
+            </label>
+            <div className="space-y-2">
+              {[
+                { value: 'party', label: t('typeParty') },
+                { value: 'strategic', label: t('typeStrategic') },
+                { value: 'family', label: t('typeFamily') },
+                { value: 'cooperative', label: t('typeCooperative') },
+                { value: 'educational', label: t('typeEducational') },
+                { value: 'children', label: t('typeChildren') },
+                { value: 'solo', label: t('typeSolo') }
+              ].map(option => (
+                <label key={option.value} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={newFilters.type.includes(option.value)}
+                    onChange={(e) => handleFilterChange('type', option.value, e.target.checked)}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">{option.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Játék hangulata */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              {t('filterMood')}
+            </label>
+            <div className="space-y-2">
+              {[
+                { value: 'light', label: t('moodLight') },
+                { value: 'humorous', label: t('moodHumorous') },
+                { value: 'thinking', label: t('moodThinking') },
+                { value: 'competitive', label: t('moodCompetitive') },
+                { value: 'creative', label: t('moodCreative') },
+                { value: 'narrative', label: t('moodNarrative') }
+              ].map(option => (
+                <label key={option.value} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={newFilters.mood.includes(option.value)}
+                    onChange={(e) => handleFilterChange('mood', option.value, e.target.checked)}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">{option.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Értékelés slider */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              {t('filterRating')} ({newFilters.rating[0]} - {newFilters.rating[1]})
+            </label>
+            <div className="space-y-3">
+              <input
+                type="range"
+                min="5"
+                max="10"
+                step="0.1"
+                value={newFilters.rating[0]}
+                onChange={(e) => handleFilterChange('rating', [parseFloat(e.target.value), newFilters.rating[1]])}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              />
+              <input
+                type="range"
+                min="5"
+                max="10" 
+                step="0.1"
+                value={newFilters.rating[1]}
+                onChange={(e) => handleFilterChange('rating', [newFilters.rating[0], parseFloat(e.target.value)])}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              />
+            </div>
+          </div>
+
+        </div>
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {/* Játékosok száma */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">{t('minPlayers')}</label>
-          <input
-            type="number"
-            min="1"
-            value={advancedFilters.minPlayers}
-            onChange={(e) => setAdvancedFilters({...advancedFilters, minPlayers: e.target.value})}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="1"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">{t('maxPlayers')}</label>
-          <input
-            type="number"
-            min="1"
-            value={advancedFilters.maxPlayers}
-            onChange={(e) => setAdvancedFilters({...advancedFilters, maxPlayers: e.target.value})}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="8"
-          />
-        </div>
-
-        {/* Játékidő */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">{t('minTime')}</label>
-          <input
-            type="number"
-            min="1"
-            value={advancedFilters.minTime}
-            onChange={(e) => setAdvancedFilters({...advancedFilters, minTime: e.target.value})}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="15"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">{t('maxTime')}</label>
-          <input
-            type="number"
-            min="1"
-            value={advancedFilters.maxTime}
-            onChange={(e) => setAdvancedFilters({...advancedFilters, maxTime: e.target.value})}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="180"
-          />
-        </div>
-
-        {/* Bonyolultság */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">{t('minComplexity')}</label>
-          <input
-            type="number"
-            min="0"
-            max="5"
-            step="0.1"
-            value={advancedFilters.minComplexity}
-            onChange={(e) => setAdvancedFilters({...advancedFilters, minComplexity: e.target.value})}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="1.0"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">{t('maxComplexity')}</label>
-          <input
-            type="number"
-            min="0"
-            max="5"
-            step="0.1"
-            value={advancedFilters.maxComplexity}
-            onChange={(e) => setAdvancedFilters({...advancedFilters, maxComplexity: e.target.value})}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="4.0"
-          />
-        </div>
-
-        {/* Kiadási év */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">{t('minYear')}</label>
-          <input
-            type="number"
-            min="1900"
-            max="2025"
-            value={advancedFilters.minYear}
-            onChange={(e) => setAdvancedFilters({...advancedFilters, minYear: e.target.value})}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="1995"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">{t('maxYear')}</label>
-          <input
-            type="number"
-            min="1900"
-            max="2025"
-            value={advancedFilters.maxYear}
-            onChange={(e) => setAdvancedFilters({...advancedFilters, maxYear: e.target.value})}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="2023"
-          />
-        </div>
-
-        {/* Kategória */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">{t('categoryFilter')}</label>
-          <input
-            type="text"
-            value={advancedFilters.category}
-            onChange={(e) => setAdvancedFilters({...advancedFilters, category: e.target.value})}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Strategy"
-          />
-        </div>
-
-        {/* Tervező */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">{t('designerFilter')}</label>
-          <input
-            type="text"
-            value={advancedFilters.designer}
-            onChange={(e) => setAdvancedFilters({...advancedFilters, designer: e.target.value})}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Reiner Knizia"
-          />
-        </div>
-      </div>
-    </div>
-  );
+    );
+  };
 
   const GameCard = ({ game }) => {
     const [ownersExpanded, setOwnersExpanded] = useState(false);
