@@ -217,6 +217,13 @@ const translations = {
     advancedFilters: 'Advanced Filters',
     showFilters: 'Show Filters',
     hideFilters: 'Hide Filters',
+    
+    // Owners
+    owners: 'Owners',
+    ownedBy: 'Owned by',
+    addToMyCollection: 'I own this too',
+    alreadyOwned: 'Already yours',
+    multipleOwners: 'owners',
     minPlayers: 'Min. Players',
     maxPlayers: 'Max. Players',
     minTime: 'Min. Time (min)',
