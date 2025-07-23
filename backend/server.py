@@ -273,13 +273,76 @@ async def get_current_user(user_id: str = Depends(verify_token)):
         del user["_id"]
     return User(**user)
 def clean_html(text: str) -> str:
-    """Remove HTML tags from text"""
-    if not text:
-        return ""
-    # Simple HTML tag removal
+    """Clean HTML tags from text"""
     import re
     clean = re.compile('<.*?>')
     return re.sub(clean, '', text)
+
+# Helper functions for game categorization
+def categorize_game_type(categories: List[str]) -> List[str]:
+    """Categorize game based on categories into types that match frontend filters"""
+    types = []
+    category_list = categories or []
+    
+    # Party games
+    if any('party' in cat.lower() or 'bluffing' in cat.lower() or 'trivia' in cat.lower() or 'humor' in cat.lower() for cat in category_list):
+        types.append('party')
+    
+    # Strategic games
+    if any('strategic' in cat.lower() or 'strategy' in cat.lower() or 'war' in cat.lower() or 'economic' in cat.lower() or 'civilization' in cat.lower() or 'territory' in cat.lower() for cat in category_list):
+        types.append('strategic')
+    
+    # Family games
+    if any('family' in cat.lower() or 'children' in cat.lower() or 'educational' in cat.lower() for cat in category_list):
+        types.append('family')
+    
+    # Cooperative games
+    if any('cooperative' in cat.lower() or 'co-op' in cat.lower() for cat in category_list):
+        types.append('cooperative')
+    
+    # Educational games
+    if any('educational' in cat.lower() or 'learning' in cat.lower() or 'math' in cat.lower() or 'word' in cat.lower() for cat in category_list):
+        types.append('educational')
+    
+    # Children games
+    if any('children' in cat.lower() or 'kid' in cat.lower() or 'memory' in cat.lower() or 'simple' in cat.lower() for cat in category_list):
+        types.append('children')
+    
+    # Solo games - based on min_players = 1, but we can check categories too
+    # This will be handled elsewhere
+    
+    return types
+
+def categorize_game_mood(categories: List[str]) -> List[str]:
+    """Categorize game based on categories into moods that match frontend filters"""
+    moods = []
+    category_list = categories or []
+    
+    # Light games
+    if any('party' in cat.lower() or 'family' in cat.lower() or 'casual' in cat.lower() or 'light' in cat.lower() for cat in category_list):
+        moods.append('light')
+    
+    # Humorous games
+    if any('humor' in cat.lower() or 'funny' in cat.lower() or 'silly' in cat.lower() or 'party' in cat.lower() for cat in category_list):
+        moods.append('humorous')
+    
+    # Thinking games
+    if any('strategic' in cat.lower() or 'strategy' in cat.lower() or 'puzzle' in cat.lower() or 'abstract' in cat.lower() or 'brain' in cat.lower() for cat in category_list):
+        moods.append('thinking')
+    
+    # Competitive games
+    if any('war' in cat.lower() or 'fighting' in cat.lower() or 'competitive' in cat.lower() or 'conflict' in cat.lower() for cat in category_list):
+        moods.append('competitive')
+    
+    # Creative games
+    if any('creative' in cat.lower() or 'building' in cat.lower() or 'drawing' in cat.lower() or 'storytelling' in cat.lower() for cat in category_list):
+        moods.append('creative')
+    
+    # Narrative games
+    if any('adventure' in cat.lower() or 'story' in cat.lower() or 'rpg' in cat.lower() or 'thematic' in cat.lower() or 'narrative' in cat.lower() for cat in category_list):
+        moods.append('narrative')
+    
+    return moods
 
 def categorize_game_type(categories: List[str]) -> List[str]:
     """Categorize game types based on BGG categories"""
