@@ -1461,10 +1461,10 @@ class BoardGameAPITester:
 if __name__ == "__main__":
     tester = BoardGameAPITester()
     try:
-        # Run thumbnail-focused tests as requested in the review
-        success = tester.run_thumbnail_tests()
+        # Run Hungarian description tests as requested in the review
+        success = tester.run_hungarian_description_tests()
         exit_code = 0 if success else 1
-        print(f"\n🏁 Thumbnail testing completed with exit code: {exit_code}")
+        print(f"\n🏁 Hungarian description testing completed with exit code: {exit_code}")
     except KeyboardInterrupt:
         print("\n⚠️  Testing interrupted by user")
         tester.cleanup_test_games()
