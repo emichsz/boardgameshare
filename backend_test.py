@@ -1317,13 +1317,19 @@ class BoardGameAPITester:
         # 1. Backend Stability Check
         self.test_backend_stability()
         
-        # 2. Hungarian Description Update Tests
+        # 2. Game Model Structure Tests
+        self.test_game_model_structure()
+        
+        # 3. BGG Hungarian Translation Tests
+        self.test_bgg_hungarian_translations()
+        
+        # 4. Hungarian Description Update Tests (endpoint structure)
         self.test_hungarian_description_update()
         
-        # 3. Field Validation Tests
+        # 5. Field Validation Tests
         self.test_hungarian_description_field_validation()
         
-        # 4. Summary
+        # 6. Summary
         print("\n📊 Hungarian Description Test Summary")
         print("=" * 60)
         
