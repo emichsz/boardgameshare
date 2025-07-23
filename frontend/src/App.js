@@ -86,6 +86,13 @@ const translations = {
     advancedFilters: 'Részletes szűrők',
     showFilters: 'Szűrők megjelenítése',
     hideFilters: 'Szűrők elrejtése',
+    
+    // Tulajdonosok
+    owners: 'Tulajdonosok',
+    ownedBy: 'Birtokosa',
+    addToMyCollection: 'Nekem is megvan',
+    alreadyOwned: 'Már a tiéd',
+    multipleOwners: 'tulajdonos',
     minPlayers: 'Min. játékosok',
     maxPlayers: 'Max. játékosok',
     minTime: 'Min. játékidő (perc)',
