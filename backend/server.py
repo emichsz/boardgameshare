@@ -713,6 +713,57 @@ async def get_game_details(bgg_id: str):
         logger.error("Invalid XML from BGG thing API")
         raise HTTPException(status_code=502, detail="Invalid response from BoardGameGeek")
 
+@app.post("/api/games/{game_id}/add-to-my-collection")
+async def add_existing_game_to_my_collection(game_id: str, current_user: User = Depends(get_current_user)):
+    """Add an existing game to current user's collection"""
+    try:
+        # Találjuk meg a játékot
+        game = await db.games.find_one({"_id": ObjectId(game_id) if ObjectId.is_valid(game_id) else game_id})
+        
+        if not game:
+            raise HTTPException(status_code=404, detail="Game not found")
+        
+        # Ellenőrizzük, hogy már birtokolja-e a user
+        owners_list = game.get("owners", [])
+        
+        # Backwards compatibility: ha nincs owners lista, de van owner_id
+        if not owners_list and game.get("owner_id"):
+            owners_list = [{
+                "user_id": game.get("owner_id"),
+                "user_name": game.get("owner_name", "Unknown"),
+                "added_date": datetime.now(),
+                "personal_notes": game.get("personal_notes", "")
+            }]
+        
+        # Ellenőrizzük, hogy a user már tulajdonos-e
+        user_already_owner = any(owner.get("user_id") == current_user.id for owner in owners_list)
+        
+        if user_already_owner:
+            raise HTTPException(status_code=409, detail="You already own this game")
+        
+        # Hozzáadjuk a felhasználót a tulajdonosok listájához
+        new_owner = {
+            "user_id": current_user.id,
+            "user_name": current_user.name,
+            "added_date": datetime.now(),
+            "personal_notes": ""
+        }
+        owners_list.append(new_owner)
+        
+        # Frissítjük az adatbázist
+        await db.games.update_one(
+            {"_id": ObjectId(game_id) if ObjectId.is_valid(game_id) else game_id},
+            {"$set": {"owners": owners_list}}
+        )
+        
+        return {"message": "Game added to your collection successfully"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error adding game to collection: {e}")
+        raise HTTPException(status_code=500, detail="Failed to add game to collection")
+
 @app.post("/api/games", response_model=GameDetails)
 async def add_game_to_collection(game_data: GameDetails, current_user: User = Depends(get_current_user)):
     """Add a game to the collection"""
