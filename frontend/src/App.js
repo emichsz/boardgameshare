@@ -58,6 +58,8 @@ const translations = {
     // Magyar lokalizáció mezők
     hungarianTitle: 'Magyar cím',
     hungarianDescription: 'Magyar leírás',
+    hungarianShortDescription: 'Magyar rövid leírás',
+    hungarianLongDescription: 'Magyar hosszú leírás',
     gameLanguage: 'Játék nyelve',
     hungarian: 'Magyar',
     english: 'Angol',
