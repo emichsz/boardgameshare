@@ -480,6 +480,18 @@ function AppContent() {
       const response = await axios.get(`${API_BASE_URL}/api/games?${params.toString()}`);
       let filteredGames = response.data;
       
+      // Számlálók frissítése
+      if (!myGamesOnly) {
+        setAllGamesCount(filteredGames.length);
+        // Saját játékok számolása
+        const myGames = filteredGames.filter(game => 
+          game.owners && game.owners.some(owner => owner.user_id === user?.id)
+        );
+        setMyGamesCount(myGames.length);
+      } else {
+        setMyGamesCount(filteredGames.length);
+      }
+      
       // HTML entitások dekódolása a lista elemekben is
       filteredGames = filteredGames.map(game => ({
         ...game,
@@ -490,6 +502,9 @@ function AppContent() {
         description_hu: decodeHtmlEntities(game.description_hu),
         description_short_hu: decodeHtmlEntities(game.description_short_hu)
       }));
+      
+      // Új szűrők alkalmazása
+      filteredGames = applyNewFilters(filteredGames);
       
       // Kliens oldali fejlett szűrés
       if (showAdvancedFilters) {
