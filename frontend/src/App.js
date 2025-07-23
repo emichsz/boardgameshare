@@ -15,7 +15,8 @@ const translations = {
     language: 'Language',
     
     // Szűrők
-    allGames: 'Összes játék',
+    allGames: 'Minden játék',
+    myGames: 'Saját játékok',
     available: 'Elérhető',
     borrowed: 'Kölcsönadva',
     searchCollection: 'Keresés a gyűjteményben...',
