@@ -301,6 +301,50 @@ async def root():
     return {"message": "Board Game Collection API", "version": "1.0.0"}
 
 # Authentication endpoints
+@app.post("/api/auth/test-user")
+async def test_user_auth():
+    """Special test user authentication bypass - for automated testing only"""
+    try:
+        # Check if test user exists
+        test_user = await db.users.find_one({"email": "admin42@test.com"})
+        
+        if not test_user:
+            # Create test user
+            new_test_user = User(
+                google_id="test_admin42",
+                email="admin42@test.com",
+                name="Admin42 Test User",
+                picture=None
+            )
+            result = await db.users.insert_one(new_test_user.dict())
+            test_user_dict = new_test_user.dict()
+            test_user_dict["id"] = str(result.inserted_id)
+            test_user = test_user_dict
+        else:
+            # Ensure user has proper ID
+            if "_id" in test_user and "id" not in test_user:
+                test_user["id"] = str(test_user["_id"])
+            elif "id" not in test_user:
+                test_user["id"] = str(test_user.get("_id", ""))
+        
+        # Create access token
+        token = create_access_token(test_user["id"], test_user["email"])
+        
+        return {
+            "access_token": token,
+            "user": {
+                "id": test_user["id"],
+                "email": test_user["email"],
+                "name": test_user["name"],
+                "picture": test_user.get("picture"),
+                "address": test_user.get("address")
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Test user auth error: {e}")
+        raise HTTPException(status_code=500, detail="Test authentication failed")
+
 @app.post("/api/auth/google")
 async def google_auth(auth_request: GoogleAuthRequest):
     """Authenticate user with Google OAuth"""
