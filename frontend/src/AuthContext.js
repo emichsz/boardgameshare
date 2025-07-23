@@ -105,6 +105,32 @@ function AuthProviderBase({ children }) {
     }
   };
 
+  // Test user login function
+  const loginAsTestUser = async () => {
+    try {
+      setError(null);
+      console.log('Logging in as test user admin42...');
+      
+      // Call test user endpoint
+      const response = await axios.post(`${API_BASE_URL}/api/auth/test-user`);
+      const { access_token, user: userData } = response.data;
+      
+      // Store token in localStorage
+      localStorage.setItem('auth_token', access_token);
+      
+      // Set axios default header
+      axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+      
+      // Set user data
+      setUser(userData);
+      
+      console.log('Test user login successful:', userData);
+    } catch (error) {
+      console.error('Test user login error:', error);
+      setError('Test user bejelentkezés sikertelen.');
+    }
+  };
+
   // Context value
   const contextValue = {
     user,
@@ -112,6 +138,7 @@ function AuthProviderBase({ children }) {
     error,
     handleGoogleLoginSuccess,
     handleGoogleLoginError,
+    loginAsTestUser,
     logout,
     isAuthenticated: !!user,
     setError
