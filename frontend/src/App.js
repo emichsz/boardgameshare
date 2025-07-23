@@ -1150,6 +1150,7 @@ function AppContent() {
           ...game,
           title_hu: game.title_hu || '',
           description_hu: game.description_hu || '',
+          description_short_hu: game.description_short_hu || '',
           personal_notes: game.personal_notes || ''
         });
       }
