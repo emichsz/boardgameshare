@@ -768,22 +768,72 @@ async def add_existing_game_to_my_collection(game_id: str, current_user: User = 
 async def add_game_to_collection(game_data: GameDetails, current_user: User = Depends(get_current_user)):
     """Add a game to the collection"""
     try:
-        # Set owner information
-        game_data.owner_id = current_user.id
-        game_data.owner_name = current_user.name
+        # Ellenőrizzük, hogy létezik-e már ilyen játék a rendszerben
+        existing_game = await db.games.find_one({"bgg_id": game_data.bgg_id})
         
-        # Check if game already exists for this user
-        existing = await db.games.find_one({"bgg_id": game_data.bgg_id, "owner_id": current_user.id})
-        if existing:
-            raise HTTPException(status_code=409, detail="Game already in your collection")
+        if existing_game:
+            # Ha már létezik, ellenőrizzük, hogy a user már tulajdonos-e
+            owners_list = existing_game.get("owners", [])
+            
+            # Backwards compatibility
+            if not owners_list and existing_game.get("owner_id"):
+                owners_list = [{
+                    "user_id": existing_game.get("owner_id"),
+                    "user_name": existing_game.get("owner_name", "Unknown"),
+                    "added_date": datetime.now(),
+                    "personal_notes": existing_game.get("personal_notes", "")
+                }]
+            
+            user_already_owner = any(owner.get("user_id") == current_user.id for owner in owners_list)
+            
+            if user_already_owner:
+                raise HTTPException(status_code=409, detail="Game already in your collection")
+            
+            # Hozzáadjuk a felhasználót a meglévő játékhoz
+            new_owner = {
+                "user_id": current_user.id,
+                "user_name": current_user.name,
+                "added_date": datetime.now(),
+                "personal_notes": game_data.personal_notes or ""
+            }
+            owners_list.append(new_owner)
+            
+            # Frissítjük a meglévő játékot
+            await db.games.update_one(
+                {"bgg_id": game_data.bgg_id},
+                {"$set": {"owners": owners_list}}
+            )
+            
+            # Visszaküldés
+            updated_game = await db.games.find_one({"bgg_id": game_data.bgg_id})
+            updated_game["id"] = str(updated_game.get("_id", updated_game.get("id", "")))
+            if "_id" in updated_game:
+                del updated_game["_id"]
+            return GameDetails(**updated_game)
         
-        # Save to database
-        game_dict = game_data.dict()
-        await db.games.insert_one(game_dict)
+        else:
+            # Új játék létrehozása
+            game_data.owners = [{
+                "user_id": current_user.id,
+                "user_name": current_user.name,
+                "added_date": datetime.now(),
+                "personal_notes": game_data.personal_notes or ""
+            }]
+            
+            # Backwards compatibility mezők beállítása
+            game_data.owner_id = current_user.id
+            game_data.owner_name = current_user.name
+            
+            # Mentés adatbázisba
+            game_dict = game_data.dict()
+            result = await db.games.insert_one(game_dict)
+            game_data.id = str(result.inserted_id)
+            
+            logger.info(f"Added new game: {game_data.title} for user: {current_user.name}")
+            return game_data
         
-        logger.info(f"Added game: {game_data.title} for user: {current_user.name}")
-        return game_data
-        
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error adding game: {e}")
         raise HTTPException(status_code=500, detail="Failed to add game to collection")
