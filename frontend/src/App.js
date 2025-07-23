@@ -727,7 +727,7 @@ function AppContent() {
 
   useEffect(() => {
     fetchGames();
-  }, [filter, searchFilter, advancedFilters, showAdvancedFilters, sortBy, sortOrder, myGamesOnly]);
+  }, [filter, searchFilter, sortBy, sortOrder, myGamesOnly, newFilters]);
 
   // Search BoardGameGeek
   const searchBGG = async () => {
