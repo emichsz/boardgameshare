@@ -805,6 +805,18 @@ function AppContent() {
     const [ownersExpanded, setOwnersExpanded] = useState(false);
     const [showActionMenu, setShowActionMenu] = useState(false);
     
+    // Bezárjuk a menüt, ha máshova kattintanak
+    useEffect(() => {
+      const handleClickOutside = () => {
+        setShowActionMenu(false);
+      };
+      
+      if (showActionMenu) {
+        document.addEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+      }
+    }, [showActionMenu]);
+    
     const getLanguageFlag = (lang) => {
       switch (lang) {
         case 'hu': return '🇭🇺';
