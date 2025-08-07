@@ -21,6 +21,12 @@ class BoardGameAPITester:
             'Content-Type': 'application/json',
             'Accept': 'application/json'
         })
+        # Disable SSL verification for testing purposes
+        self.session.verify = False
+        # Suppress SSL warnings
+        import urllib3
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        
         self.test_results = []
         self.added_games = []  # Track games added during testing for cleanup
         
